@@ -35,7 +35,6 @@ cli/__test__/*/**/*.html
 /coverage
 .ghpages-tmp
 stats.json
-yarn.lock
 .idea
 .vscode
 .eslintcache

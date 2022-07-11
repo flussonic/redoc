@@ -14,18 +14,19 @@ RUN apt update \
 
 # компонент
 WORKDIR redoc
-ADD package.json .
-ADD yarn.lock .
+COPY package.json .
+COPY yarn.lock .
 RUN yarn install --force
 
-ADD tsconfig.json .
-ADD webpack.config.ts .
-ADD custom.d.ts .
+COPY tsconfig.json .
+COPY webpack.config.ts .
+COPY custom.d.ts .
 COPY typings/styled-patch.d.ts typings/styled-patch.d.ts
+COPY config config
 
-ADD src src
-ADD cli cli
-ADD ci ci
+COPY src src
+COPY cli cli
+COPY ci ci
 RUN yarn bundle
 
 ARG NPM_TOKEN

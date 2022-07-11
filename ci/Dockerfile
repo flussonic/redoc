@@ -20,9 +20,8 @@ RUN yarn install --force
 
 ADD tsconfig.json .
 ADD webpack.config.ts .
-ADD tslint.json .
-ADD .eslintrc.js .
 ADD custom.d.ts .
+COPY typings/styled-patch.d.ts typings/styled-patch.d.ts
 
 ADD src src
 ADD cli cli

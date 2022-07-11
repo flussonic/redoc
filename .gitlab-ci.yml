@@ -15,6 +15,8 @@ build:
 
 npm-upload:
   stage: Build
+  needs:
+    - build
   script:
     - NPM_TOKEN=$NPM_TOKEN make npm-upload
   only:

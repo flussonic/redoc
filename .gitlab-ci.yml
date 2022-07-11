@@ -14,7 +14,7 @@ build:
     expire_in: 3 days
 
 npm-upload:
-  stage: Upload
+  stage: Build
   script:
     - NPM_TOKEN=$NPM_TOKEN make npm-upload
   only:

@@ -7,6 +7,7 @@
 !custom.d.ts
 !typings/styled-patch.d.ts
 !tsconfig.json
+!tsconfig.lib.json
 !webpack.config.ts
 
 !package.json

@@ -16,9 +16,10 @@ RUN apt update \
 WORKDIR redoc
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install --force
+RUN yarn install
 
 COPY tsconfig.json .
+COPY tsconfig.lib.json .
 COPY webpack.config.ts .
 COPY custom.d.ts .
 COPY typings/styled-patch.d.ts typings/styled-patch.d.ts

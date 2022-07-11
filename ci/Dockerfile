@@ -19,7 +19,6 @@ ADD yarn.lock .
 RUN yarn install --force
 
 ADD tsconfig.json .
-ADD tsconfig.lib.json .
 ADD webpack.config.ts .
 ADD tslint.json .
 ADD .eslintrc.js .

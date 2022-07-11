@@ -33,5 +33,5 @@ RUN yarn bundle
 ARG NPM_TOKEN
 ARG VERSION
 RUN npm config set @flussonic:registry https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/
-RUN npm config set -- '//git.erlyvideo.ru/api/v4/projects/296/packages/npm/:_authToken' "${NPM_TOKEN}"
+RUN npm config set -- '//git.erlyvideo.ru/api/v4/projects/311/packages/npm/:_authToken' "${NPM_TOKEN}"
 RUN sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' package.json

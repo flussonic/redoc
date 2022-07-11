@@ -23,15 +23,14 @@ build:
 		--build-arg VERSION=$(VERSION) \
 		--build-arg NPM_TOKEN=$(NPM_TOKEN) \
 		--build-arg PKG_VERSION=$(VERSION) \
-		--build-arg P
-		UBLIC_URL=/dist/retroview-ui/${CI_COMMIT_REF_SLUG}/${CI_COMMIT_SHORT_SHA}/ \
-		--tag ${CI_REGISTRY}/watcher/retroview-ui/src-${CI_COMMIT_REF_SLUG}:latest .
+		--build-arg PUBLIC_URL=/dist/redoc/${CI_COMMIT_REF_SLUG}/${CI_COMMIT_SHORT_SHA}/ \
+		--tag ${CI_REGISTRY}/redoc/src-${CI_COMMIT_REF_SLUG}:latest .
 
 build-extract:
 	rm -rf output
-	CONTAINER=$$(docker create ${CI_REGISTRY}/watcher/retroview-ui/src-${CI_COMMIT_REF_SLUG}:latest) ; \
-	docker cp $${CONTAINER}:/retroview-ui/example/build build ;\
+	CONTAINER=$$(docker create ${CI_REGISTRY}/redoc/src-${CI_COMMIT_REF_SLUG}:latest) ; \
+	docker cp $${CONTAINER}:/redoc/example/build build ;\
 	docker rm -f $${CONTAINER}
 
 npm-upload:
-	docker run --init --rm ${CI_REGISTRY}/watcher/retroview-ui/src-${CI_COMMIT_REF_SLUG}:latest npm publish
+	docker run --init --rm ${CI_REGISTRY}/redoc/src-${CI_COMMIT_REF_SLUG}:latest npm publish

@@ -15,8 +15,8 @@ RUN apt update \
 # компонент
 WORKDIR redoc
 COPY package.json .
-COPY yarn.lock .
-RUN yarn install
+COPY package-lock.json .
+RUN npm install
 
 COPY tsconfig.json .
 COPY tsconfig.lib.json .
@@ -28,7 +28,7 @@ COPY config config
 COPY src src
 COPY cli cli
 COPY ci ci
-RUN yarn bundle
+RUN npm run bundle
 
 ARG NPM_TOKEN
 ARG VERSION

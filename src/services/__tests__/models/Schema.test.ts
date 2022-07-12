@@ -107,11 +107,22 @@ describe('Models', () => {
       const spec = require('../fixtures/3.1/patternProperties.json');
       parser = new OpenAPIParser(spec, undefined, opts);
       const schema = new SchemaModel(parser, spec.components.schemas.Patterns, '', opts);
-      expect(schema.fields).toHaveLength(2);
-      expect(schema.fields![0].kind).toEqual('patternProperties');
-      expect(schema.fields![0].schema.type).toEqual('string');
-      expect(schema.fields![1].kind).toEqual('patternProperties');
-      expect(schema.fields![1].schema.type).toEqual('object');
+
+      expect(schema.fields).toHaveLength(4);
+      expect(schema.fields![0].kind).toEqual('field');
+      expect(schema.fields![0].name).toEqual('nestedObjectProp');
+      expect(schema.fields![0].schema.type).toEqual('object');
+      expect(schema.fields![0].schema.fields![0].kind).toEqual('patternProperties');
+
+      expect(schema.fields).toHaveLength(4);
+      expect(schema.fields![1].kind).toEqual('field');
+      expect(schema.fields![1].name).toEqual('nestedArrayProp');
+      expect(schema.fields![1].schema.items!.fields![0].kind).toEqual('patternProperties');
+
+      expect(schema.fields![2].kind).toEqual('patternProperties');
+      expect(schema.fields![2].schema.type).toEqual('string');
+      expect(schema.fields![3].kind).toEqual('patternProperties');
+      expect(schema.fields![3].schema.type).toEqual('object');
     });
 
     describe('type array', () => {
@@ -210,6 +221,22 @@ describe('Models', () => {
           expect(schema.fields![3].schema.fields![0].schema.constraints).toEqual([
             '>= 0 characters',
           ]);
+        },
+      );
+
+      test.each(eachArray)(
+        'schemaDefinition should resolve prefixItems with additional array items',
+        specFixture => {
+          const spec = require(specFixture);
+          const parser = new OpenAPIParser(spec, undefined, opts);
+          const schema = new SchemaModel(parser, spec.components.schemas.Case6, '', opts);
+          expect(schema.type).toBe('array');
+          expect(schema.typePrefix).toBe('Array of ');
+          expect(schema.items?.fields).toHaveLength(2);
+          expect(schema.items?.pointer).toEqual('#/components/schemas/Tag');
+          expect(schema.isPrimitive).toBe(false);
+          expect(schema.items?.isPrimitive).toBe(false);
+          expect(schema.minItems).toBe(1);
         },
       );
     });

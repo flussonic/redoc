@@ -136,7 +136,9 @@ export function isPrimitiveType(
     isPrimitive =
       schema.properties !== undefined
         ? Object.keys(schema.properties).length === 0
-        : schema.additionalProperties === undefined && schema.unevaluatedProperties === undefined;
+        : schema.additionalProperties === undefined &&
+          schema.unevaluatedProperties === undefined &&
+          schema.patternProperties === undefined;
   }
 
   if (isArray(schema.items) || isArray(schema.prefixItems)) {
@@ -395,6 +397,15 @@ export function langFromMime(contentType: string): string {
   if (contentType.search(/xml/i) !== -1) {
     return 'xml';
   }
+
+  if (contentType.search(/csv/i) !== -1) {
+    return 'csv';
+  }
+
+  if (contentType.search(/plain/i) !== -1) {
+    return 'tex';
+  }
+
   return 'clike';
 }
 

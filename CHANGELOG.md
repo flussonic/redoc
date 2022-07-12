@@ -1,3 +1,32 @@
+# [2.0.0-rc.72](https://github.com/Redocly/redoc/compare/v2.0.0-rc.71...v2.0.0-rc.72) (2022-06-02)
+
+
+### Bug Fixes
+
+* handled style change in ServerUrl and ServersOverlay dynamically ([#1989](https://github.com/Redocly/redoc/issues/1989)) ([a366de4](https://github.com/Redocly/redoc/commit/a366de4cf67fb94baa33b7b5c311cc1f54a63e53))
+* nested items with refs ([#2035](https://github.com/Redocly/redoc/issues/2035)) ([51127aa](https://github.com/Redocly/redoc/commit/51127aadc3e6b0f8e4066afb1c3b2ea6db453da2))
+
+
+
+# [2.0.0-rc.71](https://github.com/Redocly/redoc/compare/v2.0.0-rc.70...v2.0.0-rc.71) (2022-05-31)
+
+
+### Bug Fixes
+
+* constraints label details ([eb0917d](https://github.com/Redocly/redoc/commit/eb0917d002e57353027fee9c8f07605de8f1ff6f))
+* merge allOf in correct order ([#2020](https://github.com/Redocly/redoc/issues/2020)) ([1e4ea03](https://github.com/Redocly/redoc/commit/1e4ea03d4a9b7eddf3e4cc7cbdbd4d913583e837))
+
+
+### Features
+
+* add hideSecuritySection option allowing to disable the Security panel ([#2027](https://github.com/Redocly/redoc/issues/2027)) ([49cc11d](https://github.com/Redocly/redoc/commit/49cc11d91795653ca870e9276a1e0cd617964e25))
+* add Redoc to Redocly CDN ([#2026](https://github.com/Redocly/redoc/issues/2026)) ([77104d6](https://github.com/Redocly/redoc/commit/77104d6c0d6f457aa08a158e93b52a45877be84e))
+* add support prefix items ([27a9dba](https://github.com/Redocly/redoc/commit/27a9dbaf46aded01a6512645dab27870a85cc73b))
+* remove auth section ([#2022](https://github.com/Redocly/redoc/issues/2022)) ([a863302](https://github.com/Redocly/redoc/commit/a863302cc803bdf27187c613157ba90af1040fc4))
+* show minProperties maxProperties ([#2015](https://github.com/Redocly/redoc/issues/2015)) ([82712c5](https://github.com/Redocly/redoc/commit/82712c5b408dc6bc142307d45fb962de2a43ffba))
+
+
+
 # [2.0.0-rc.70](https://github.com/Redocly/redoc/compare/2.0.0-rc.69...2.0.0-rc.70) (2022-05-17)
 
 

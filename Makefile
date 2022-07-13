@@ -31,5 +31,4 @@ ci_publish_npm_gitlab:
 npm_publish_gitlab:
 	npm config set @web:registry https://git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
 	npm config set -- '//git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken' "${GITLAB_NPM_AUTH_TOKEN}"
-	sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' package.json
 	npm publish

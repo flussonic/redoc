@@ -1,23 +1,16 @@
 stages:
   - Build
+  - Upload
 
 build:
   stage: Build
   script:
     - make build
-  after_script:
-    - make build-extract
-  artifacts:
-    when: always
-    paths:
-      - build
-    expire_in: 3 days
 
 npm-upload:
-  stage: Build
-  needs:
-    - build
+  stage: Upload
   script:
-    - NPM_TOKEN=$NPM_TOKEN make npm-upload
+    #- NPM_TOKEN=$NPM_TOKEN make npm-upload
+    - make BRANCH=$CI_COMMIT_REF_SLUG GITLAB_NPM_AUTH_TOKEN=$GITLAB_NPM_AUTH_TOKEN ci_publish_npm_gitlab
   only:
     - main

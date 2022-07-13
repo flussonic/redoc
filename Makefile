@@ -24,13 +24,16 @@ build:
 		--build-arg NPM_TOKEN=$(NPM_TOKEN) \
 		--build-arg PKG_VERSION=$(VERSION) \
 		--build-arg PUBLIC_URL=/dist/redoc/${CI_COMMIT_REF_SLUG}/${CI_COMMIT_SHORT_SHA}/ \
-		--tag ${CI_REGISTRY}/redoc/src-${CI_COMMIT_REF_SLUG}:latest .
-
-build-extract:
-	rm -rf output
-	CONTAINER=$$(docker create ${CI_REGISTRY}/redoc/src-${CI_COMMIT_REF_SLUG}:latest) ; \
-	docker cp $${CONTAINER}:/redoc/example/build build ;\
-	docker rm -f $${CONTAINER}
+		--tag ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest .
 
 npm-upload:
-	docker run --init --rm ${CI_REGISTRY}/redoc/src-${CI_COMMIT_REF_SLUG}:latest npm publish
+	docker run --init --rm ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest npm publish
+
+ci_publish_npm_gitlab:
+	docker run --rm -e GITLAB_NPM_AUTH_TOKEN -e VERSION=${VERSION} -e CI_PROJECT_ID ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest make npm_publish_gitlab
+
+npm_publish_gitlab:
+	npm config set @flussonic:registry https://git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+	npm config set -- '//git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken' "${GITLAB_NPM_AUTH_TOKEN}"
+	sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' package.json
+	npm publish

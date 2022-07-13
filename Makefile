@@ -29,7 +29,7 @@ ci_publish_npm_gitlab:
 	docker run --rm -e GITLAB_NPM_AUTH_TOKEN -e VERSION=${VERSION} -e CI_PROJECT_ID ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest make npm_publish_gitlab
 
 npm_publish_gitlab:
-	npm config set @flussonic:registry https://git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+	npm config set @web:registry https://git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
 	npm config set -- '//git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken' "${GITLAB_NPM_AUTH_TOKEN}"
 	sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' package.json
 	npm publish

@@ -1,6 +1,6 @@
 {
-  "name": "redoc",
-  "version": "2.0.0-rc.72",
+  "name": "@web/redoc",
+  "version": "1.0.0",
   "description": "ReDoc",
   "repository": {
     "type": "git",

@@ -5,7 +5,7 @@ stages:
 build:
   stage: Build
   script:
-    - make build
+    - make BRANCH=$CI_COMMIT_REF_SLUG build
 
 npm-upload:
   stage: Upload

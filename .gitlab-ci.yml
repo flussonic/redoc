@@ -11,6 +11,6 @@ npm-upload:
   stage: Upload
   script:
     #- NPM_TOKEN=$NPM_TOKEN make npm-upload
-    - make BRANCH=$CI_COMMIT_REF_SLUG GITLAB_NPM_AUTH_TOKEN=$GITLAB_NPM_AUTH_TOKEN ci_publish_npm_gitlab
+    - make BRANCH=$CI_COMMIT_REF_SLUG GITLAB_NPM_AUTH_TOKEN=$GITLAB_NPM_AUTH_TOKEN VERSION=$(git describe --abbrev=7 --long | sed 's/^v//g') ci_publish_npm_gitlab
   only:
     - main

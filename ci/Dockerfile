@@ -1,8 +1,6 @@
 FROM ubuntu:20.04 as build
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG PUBLIC_URL
-
 RUN apt update && apt -y install curl
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -

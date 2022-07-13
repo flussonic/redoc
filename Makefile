@@ -20,10 +20,6 @@ CI_REGISTRY ?= registry.erlyvideo.ru:443
 build:
 	docker build \
 		-f ci/Dockerfile \
-		--build-arg VERSION=$(VERSION) \
-		--build-arg NPM_TOKEN=$(NPM_TOKEN) \
-		--build-arg PKG_VERSION=$(VERSION) \
-		--build-arg PUBLIC_URL=/dist/redoc/${CI_COMMIT_REF_SLUG}/${CI_COMMIT_SHORT_SHA}/ \
 		--tag ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest .
 
 npm-upload:

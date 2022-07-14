@@ -10,7 +10,13 @@ build:
 npm-upload:
   stage: Upload
   script:
-    #- NPM_TOKEN=$NPM_TOKEN make npm-upload
     - make BRANCH=$CI_COMMIT_REF_SLUG GITLAB_NPM_AUTH_TOKEN=$GITLAB_NPM_AUTH_TOKEN ci_publish_npm_gitlab
+  only:
+    - main
+
+npm-upload-cli:
+  stage: Upload
+  script:
+    - make BRANCH=$CI_COMMIT_REF_SLUG GITLAB_NPM_AUTH_TOKEN=$GITLAB_NPM_AUTH_TOKEN npm_publish_gitlab_cli
   only:
     - main

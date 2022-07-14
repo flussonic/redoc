@@ -32,3 +32,9 @@ npm_publish_gitlab:
 	npm config set @web:registry https://git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
 	npm config set -- '//git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken' "${GITLAB_NPM_AUTH_TOKEN}"
 	npm publish
+
+npm_publish_gitlab_cli:
+	npm config set @web:registry https://git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+	npm config set -- '//git.erlyvideo.ru/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken' "${GITLAB_NPM_AUTH_TOKEN}"
+	cd cli;
+	npm publish

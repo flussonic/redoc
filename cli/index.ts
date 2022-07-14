@@ -63,7 +63,7 @@ export const mimeTypes = {
   '.wasm': 'application/wasm',
 };
 
-const BUNDLES_DIR = dirname(require.resolve('redoc'));
+const BUNDLES_DIR = dirname(require.resolve('@web/redoc'));
 
 const builderForBuildCommand = yargs => {
   yargs.positional('spec', {

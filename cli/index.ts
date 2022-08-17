@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 /* tslint:disable:no-implicit-dependencies */
-import * as React from 'react';
-import { renderToString } from 'react-dom/server';
-import { ServerStyleSheet } from 'styled-components';
 
 import { compile } from 'handlebars';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
@@ -262,8 +259,6 @@ async function serve(host: string, port: number, pathToSpec: string, options: Op
     console.timeEnd('GET ' + request.url);
   });
 
-  console.log();
-
   server.listen(port, host, () => console.log(`Server started: http://${host}:${port}`));
 
   if (options.watch && existsSync(pathToSpec)) {
@@ -320,56 +315,21 @@ async function bundle(pathToSpec, options: Options = {}) {
 async function getPageHTML(
   spec: any,
   pathToSpec: string,
-  {
-    ssr,
-    cdn,
-    title,
-    disableGoogleFont,
-    templateFileName,
-    templateOptions,
-    redocOptions = {},
-  }: Options,
+  { title, disableGoogleFont, templateFileName, templateOptions, redocOptions = {} }: Options,
 ) {
-  let html;
-  let css;
-  let state;
-  let redocStandaloneSrc;
-  if (ssr) {
-    console.log('Prerendering docs');
-
-    const specUrl = redocOptions.specUrl || (isURL(pathToSpec) ? pathToSpec : undefined);
-    const store = await createStore(spec, specUrl, redocOptions);
-    const sheet = new ServerStyleSheet();
-    html = renderToString(sheet.collectStyles(React.createElement(Redoc, { store })));
-    css = sheet.getStyleTags();
-    state = await store.toJS();
-
-    if (!cdn) {
-      redocStandaloneSrc = readFileSync(join(BUNDLES_DIR, 'redoc.standalone.js'));
-    }
-  }
-
+  console.log(`qq [Index] pathToSpec`, pathToSpec);
   templateFileName = templateFileName ? templateFileName : join(__dirname, './template.hbs');
   const template = compile(readFileSync(templateFileName).toString());
+  const redocStandaloneSrc = readFileSync(join(BUNDLES_DIR, 'redoc.standalone.js'));
   return template({
     redocHTML: `
-    <div id="redoc">${(ssr && html) || ''}</div>
+    <div id="redoc"></div>
     <script>
-    ${(ssr && `const __redoc_state = ${sanitizeJSONString(JSON.stringify(state))};`) || ''}
-
     var container = document.getElementById('redoc');
-    Redoc.${
-      ssr
-        ? 'hydrate(__redoc_state, container)'
-        : `init("spec.json", ${JSON.stringify(redocOptions)}, container)`
-    };
+    Redoc.init(${JSON.stringify(spec)}, ${JSON.stringify(redocOptions)}, container);
 
     </script>`,
-    redocHead: ssr
-      ? (cdn
-          ? '<script src="https://unpkg.com/redoc@next/bundles/redoc.standalone.js"></script>'
-          : `<script>${redocStandaloneSrc}</script>`) + css
-      : '<script src="redoc.standalone.js"></script>',
+    redocHead: `<script>${redocStandaloneSrc}</script>`,
     title: title || spec.info.title || 'ReDoc documentation',
     disableGoogleFont,
     templateOptions,
@@ -414,20 +374,6 @@ function respondWithGzip(
 
 function isURL(str: string): boolean {
   return /^(https?:)\/\//m.test(str);
-}
-
-function sanitizeJSONString(str: string) {
-  return escapeClosingScriptTag(escapeUnicode(str));
-}
-
-// see http://www.thespanner.co.uk/2011/07/25/the-json-specification-is-now-wrong/
-function escapeClosingScriptTag(str) {
-  return str.replace(/<\/script>/g, '<\\/script>');
-}
-
-// see http://www.thespanner.co.uk/2011/07/25/the-json-specification-is-now-wrong/
-function escapeUnicode(str) {
-  return str.replace(/\u2028|\u2029/g, m => '\\u202' + (m === '\u2028' ? '8' : '9'));
 }
 
 function handleError(error: Error) {

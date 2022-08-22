@@ -2,7 +2,6 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 import { DISCRIMINATOR_SEPARATOR, PROPERTY_SEPARATOR } from '../../constants';
 
-import { RecursiveLabel, TypeName, TypeTitle } from '../../common-elements/fields';
 import { FieldDetails } from '../Fields/FieldDetails';
 
 import { FieldModel, SchemaModel } from '../../services/models';
@@ -10,8 +9,8 @@ import { FieldModel, SchemaModel } from '../../services/models';
 import { ArraySchema } from './ArraySchema';
 import { ObjectSchema } from './ObjectSchema';
 import { OneOfSchema } from './OneOfSchema';
+import { RecursiveSchema } from './RecursiveSchema';
 
-import { l } from '../../services/Labels';
 import { getLocationHash, isArray } from '../../utils/helpers';
 
 export interface SchemaOptions {
@@ -75,13 +74,7 @@ export class Schema extends React.Component<Partial<SchemaProps>, { discriminato
     }
 
     if (isCircular) {
-      return (
-        <div>
-          <TypeName>{schema.displayType}</TypeName>
-          {schema.title && <TypeTitle> {schema.title} </TypeTitle>}
-          <RecursiveLabel> {l('recursive')} </RecursiveLabel>
-        </div>
-      );
+      return <RecursiveSchema schema={schema} />;
     }
 
     if (discriminatorProp !== undefined) {
@@ -91,11 +84,14 @@ export class Schema extends React.Component<Partial<SchemaProps>, { discriminato
         );
         return null;
       }
-      return (
+      const activeSchema = oneOf![this.state.discriminator];
+      return activeSchema.isCircular ? (
+        <RecursiveSchema schema={activeSchema} />
+      ) : (
         <ObjectSchema
           {...rest}
           level={level}
-          schema={oneOf![this.state.discriminator]}
+          schema={activeSchema}
           discriminator={{
             fieldName: discriminatorProp,
             parentSchema: schema,

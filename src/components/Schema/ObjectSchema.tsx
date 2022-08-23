@@ -10,6 +10,7 @@ import { SchemaProps } from './Schema';
 
 import { getLocationHash, mapWithLast } from '../../utils';
 import { OptionsContext } from '../OptionsProvider';
+import { PROPERTY_SEPARATOR } from '../../constants';
 
 export interface ObjectSchemaProps extends SchemaProps {
   discriminator?: {
@@ -60,7 +61,7 @@ export const ObjectSchema = observer(
         {showTitle && <PropertiesTableCaption>{title}</PropertiesTableCaption>}
         <tbody>
           {mapWithLast(filteredFields, (field, isLast) => {
-            const fieldOperationHash = `${operationHash}|${field.name}`;
+            const fieldOperationHash = `${operationHash}${PROPERTY_SEPARATOR}${field.name}`;
 
             const isChildrenChosen =
               operationHash &&

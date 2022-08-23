@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* tslint:disable:no-implicit-dependencies */
-
+import * as updateNotifier from 'update-notifier';
 import { compile } from 'handlebars';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { dirname, join, resolve, extname as getExtName } from 'path';
@@ -108,6 +108,7 @@ const handlerForBuildCommand = async (argv: any) => {
   };
 
   try {
+    notifyUpdateCliVersion();
     await bundle(argv.spec, config);
   } catch (e) {
     handleError(e);
@@ -171,6 +172,7 @@ YargsParser.command(
     };
 
     try {
+      notifyUpdateCliVersion();
       await serve(argv.host as string, argv.port as number, argv.spec as string, config);
     } catch (e) {
       handleError(e);
@@ -179,7 +181,7 @@ YargsParser.command(
   [
     res => {
       console.log(
-        `\n⚠️ This command is deprecated. Use "npx @redocly/openapi-cli preview-docs petstore.yaml"\n`,
+        `\n⚠️ This command is deprecated. Use "npx @redocly/cli preview-docs petstore.yaml"\n`,
       );
       return res;
     },
@@ -317,7 +319,6 @@ async function getPageHTML(
   pathToSpec: string,
   { title, disableGoogleFont, templateFileName, templateOptions, redocOptions = {} }: Options,
 ) {
-  console.log(`qq [Index] pathToSpec`, pathToSpec);
   templateFileName = templateFileName ? templateFileName : join(__dirname, './template.hbs');
   const template = compile(readFileSync(templateFileName).toString());
   const redocStandaloneSrc = readFileSync(join(BUNDLES_DIR, 'redoc.standalone.js'));
@@ -412,4 +413,17 @@ function getObjectOrJSON(options) {
       }
       return {};
   }
+}
+
+function notifyUpdateCliVersion() {
+  const pkg = require('./package.json');
+  const notifier = updateNotifier({
+    pkg,
+    updateCheckInterval: 0,
+    shouldNotifyInNpmScript: true,
+  });
+  notifier.notify({
+    message:
+      'Run `{updateCommand}` to update.\nChangelog: https://github.com/Redocly/redoc/releases/tag/{latestVersion}',
+  });
 }

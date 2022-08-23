@@ -16,7 +16,7 @@ import {
   Referenced,
 } from '../types';
 import { IS_BROWSER } from './dom';
-import { isNumeric, removeQueryString, resolveUrl, isArray, isBoolean } from './helpers';
+import { isNumeric, removeQueryStringAndHash, resolveUrl, isArray, isBoolean } from './helpers';
 
 function isWildcardStatusCode(statusCode: string | number): statusCode is string {
   return typeof statusCode === 'string' && /\dxx/i.test(statusCode);
@@ -121,6 +121,10 @@ export function isPrimitiveType(
   schema: OpenAPISchema,
   type: string | string[] | undefined = schema.type,
 ) {
+  if (schema['x-circular-ref']) {
+    return true;
+  }
+
   if (schema.oneOf !== undefined || schema.anyOf !== undefined) {
     return false;
   }
@@ -552,13 +556,13 @@ export function mergeParams(
 ): Array<Referenced<OpenAPIParameter>> {
   const operationParamNames = {};
   operationParams.forEach(param => {
-    param = parser.shallowDeref(param);
+    ({ resolved: param } = parser.deref(param));
     operationParamNames[param.name + '_' + param.in] = true;
   });
 
   // filter out path params overridden by operation ones with the same name
   pathParams = pathParams.filter(param => {
-    param = parser.shallowDeref(param);
+    ({ resolved: param } = parser.deref(param));
     return !operationParamNames[param.name + '_' + param.in];
   });
 
@@ -602,7 +606,7 @@ export function normalizeServers(
     return href.endsWith('.html') ? dirname(href) : href;
   };
 
-  const baseUrl = specUrl === undefined ? removeQueryString(getHref()) : dirname(specUrl);
+  const baseUrl = specUrl === undefined ? removeQueryStringAndHash(getHref()) : dirname(specUrl);
 
   if (servers.length === 0) {
     // Behaviour defined in OpenAPI spec: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#openapi-object
@@ -627,6 +631,7 @@ export function normalizeServers(
 }
 
 export const SECURITY_DEFINITIONS_JSX_NAME = 'SecurityDefinitions';
+export const OLD_SECURITY_DEFINITIONS_JSX_NAME = 'security-definitions';
 export const SCHEMA_DEFINITION_JSX_NAME = 'SchemaDefinition';
 
 export let SECURITY_SCHEMES_SECTION_PREFIX = 'section/Authentication/';
@@ -643,6 +648,8 @@ export const shortenHTTPVerb = verb =>
 export function isRedocExtension(key: string): boolean {
   const redocExtensions = {
     'x-circular-ref': true,
+    'x-parentRefs': true,
+    'x-refsStack': true,
     'x-code-samples': true, // deprecated
     'x-codeSamples': true,
     'x-displayName': true,

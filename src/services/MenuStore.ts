@@ -1,43 +1,21 @@
 import { action, observable, makeObservable } from 'mobx';
 import { DISCRIMINATOR_SEPARATOR, PROPERTY_SEPARATOR, RESPONSE_POSTFIX } from '../constants';
 import { querySelector } from '../utils/dom';
-import { SpecStore } from './models';
-
-import { history as historyInst, HistoryService } from './HistoryService';
-import { ScrollService } from './ScrollService';
-
 import {
   escapeHTMLAttrChars,
   flattenByProp,
-  getLocationHash,
   SECURITY_SCHEMES_SECTION_PREFIX,
+  getLocationHash,
 } from '../utils';
+
+import { history as historyInst, HistoryService } from './HistoryService';
 import { GROUP_DEPTH } from './MenuBuilder';
 
-export type MenuItemGroupType = 'group' | 'tag' | 'section';
-export type MenuItemType = MenuItemGroupType | 'operation';
+import type { SpecStore } from './models';
+import type { ScrollService } from './ScrollService';
+import type { IMenuItem } from './types';
 
 /** Generic interface for MenuItems */
-export interface IMenuItem {
-  id: string;
-  absoluteIdx?: number;
-  name: string;
-  sidebarLabel: string;
-  description?: string;
-  depth: number;
-  active: boolean;
-  expanded: boolean;
-  items: IMenuItem[];
-  parent?: IMenuItem;
-  deprecated?: boolean;
-  type: MenuItemType;
-
-  deactivate(): void;
-  activate(): void;
-
-  collapse(): void;
-  expand(): void;
-}
 
 export const SECTION_ATTR = 'data-section-id';
 

@@ -43,10 +43,11 @@ export class AdvancedMarkdown extends React.Component<AdvancedMarkdownProps> {
           { key: idx },
         );
       }
+      const PartComponent = part.component as React.FunctionComponent;
       return (
-        <part.component
-          key={idx}
+        <PartComponent
           operationHash={operationHash}
+          key={idx}
           {...{ ...part.props, ...part.propsSelector(store) }}
         />
       );

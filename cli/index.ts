@@ -319,7 +319,6 @@ async function getPageHTML(
   pathToSpec: string,
   { title, disableGoogleFont, templateFileName, templateOptions, redocOptions = {} }: Options,
 ) {
-  console.log(`qq [Index] pathToSpec`, pathToSpec);
   templateFileName = templateFileName ? templateFileName : join(__dirname, './template.hbs');
   const template = compile(readFileSync(templateFileName).toString());
   const redocStandaloneSrc = readFileSync(join(BUNDLES_DIR, 'redoc.standalone.js'));

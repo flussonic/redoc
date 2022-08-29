@@ -11,6 +11,7 @@ import { Schema } from '../Schema';
 
 import { Markdown } from '../Markdown/Markdown';
 import { ConstraintsView } from '../Fields/FieldContstraints';
+import { PROPERTY_SEPARATOR } from '../../constants';
 
 function safePush(obj, prop, item) {
   if (!obj[prop]) {
@@ -57,14 +58,14 @@ export class Parameters extends React.PureComponent<ParametersProps> {
             key={place}
             place={place}
             parameters={paramsMap[place]}
-            operationHash={operationHash}
+            operationHash={`${operationHash}${PROPERTY_SEPARATOR}${place}`}
           />
         ))}
         {bodyContent && (
           <BodyContent
             content={bodyContent}
             description={bodyDescription}
-            operationHash={operationHash}
+            operationHash={`${operationHash}${PROPERTY_SEPARATOR}body`}
           />
         )}
       </>

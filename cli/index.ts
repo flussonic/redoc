@@ -221,7 +221,7 @@ YargsParser.command(
 
 async function serve(host: string, port: number, pathToSpec: string, options: Options = {}) {
   let spec = await loadAndBundleSpec(isURL(pathToSpec) ? pathToSpec : resolve(pathToSpec));
-  let pageHTML = await getPageHTML(spec, pathToSpec, options);
+  let pageHTML = await getPageHTML(spec, options);
   const server = createServer((request, response) => {
     console.time('GET ' + request.url);
     if (request.url === '/redoc.standalone.js') {
@@ -276,7 +276,7 @@ async function serve(host: string, port: number, pathToSpec: string, options: Op
     const handlePath = async _path => {
       try {
         spec = await loadAndBundleSpec(resolve(pathToSpec));
-        pageHTML = await getPageHTML(spec, pathToSpec, options);
+        pageHTML = await getPageHTML(spec, options);
         log('Updated successfully');
       } catch (e) {
         console.error('Error while updating: ', e.message);
@@ -303,7 +303,7 @@ async function serve(host: string, port: number, pathToSpec: string, options: Op
 async function bundle(pathToSpec, options: Options = {}) {
   const start = Date.now();
   const spec = await loadAndBundleSpec(isURL(pathToSpec) ? pathToSpec : resolve(pathToSpec));
-  const pageHTML = await getPageHTML(spec, pathToSpec, { ...options, ssr: true });
+  const pageHTML = await getPageHTML(spec, { ...options, ssr: true });
 
   mkdirp.sync(dirname(options.output!));
   writeFileSync(options.output!, pageHTML);
@@ -316,7 +316,6 @@ async function bundle(pathToSpec, options: Options = {}) {
 
 async function getPageHTML(
   spec: any,
-  pathToSpec: string,
   { title, disableGoogleFont, templateFileName, templateOptions, redocOptions = {} }: Options,
 ) {
   templateFileName = templateFileName ? templateFileName : join(__dirname, './template.hbs');

@@ -16,7 +16,11 @@ export function pushRef(stack: string[], ref?: string): string[] {
 }
 
 export function concatRefStacks(base: string[], stack?: string[]): string[] {
-  return stack ? base.concat(stack) : base;
+  // fix error out of memory https://github.com/Redocly/redoc/issues/2184
+  if (stack) {
+    // do nothing
+  }
+  return base;
 }
 
 export class OpenAPIParser {

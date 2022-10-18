@@ -6,16 +6,31 @@
       "name": "Support team",
       "url": "https://flussonic.com/"
     },
-    "description": "This document is a comprehensive API specification for the Flussonic Media Server.\n\nThe Flussonic Media Server API lets you manage the server configuration: retrieving the information about the streams, DVRs, templates, etc., \ncreating/updating, and removing them.\nTo know more about our API's design principles, visit [Flussonic HTTP API](https://flussonic.com/doc/api/flussonic-http-api/) page.\n\nThis API Reference provides you with all the methods, fields, values, and endpoints currently accessible in Flussonic.\n\nBefore you proceed, read the following information:\n\n* `server_config` represents the server configuration file. Our built-in config parser validates the configuration file structure \naccording to this specification.\n* Some API methods may send extra fields in responses, so your application must be ready to drop them;\n* Do not rely on undocumented fields in the responses as we may modify them at any moment.\n* In further updates of this document, some fields may become deprecated. Such fields will be scheduled for deletion with \n`x-delete-at` property with year and month, after which it will no longer exist.\n",
+    "description": "This document is a comprehensive API specification for the Flussonic Media Server.\n\nThe Flussonic Media Server API lets you manage the server configuration: retrieving the information about the streams, DVRs, templates, etc., \ncreating/updating, and removing them.\nTo know more about our API's design principles, visit [Flussonic HTTP API](https://flussonic.com/doc/api/flussonic-http-api/) page.\n\nPermanent [download link](https://flussonic.com/doc/api/reference.json) to JSON schema file.\n\nThis API Reference provides you with all the methods, fields, values, and endpoints currently accessible in Flussonic.\n\nBefore you proceed, read the following information:\n\n* `server_config` represents the server configuration file. Our built-in config parser validates the configuration file structure \naccording to this specification.\n* Some API methods may send extra fields in responses, so your application must be ready to drop them;\n* Do not rely on undocumented fields in the responses as we may modify them at any moment.\n* In further updates of this document, some fields may become deprecated. Such fields will be scheduled for deletion with \n`x-delete-at` property with year and month, after which it will no longer exist.\n",
     "title": "Flussonic Media Server API",
-    "version": "22.06.1-259"
+    "version": "22.06.1-461"
   },
   "components": {
     "schemas": {
+      "program_id": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 65535,
+        "x-notice": "mpegts program number"
+      },
       "ts_pid": {
         "maximum": 8191,
         "minimum": 0,
         "type": "integer"
+      },
+      "iso8601": {
+        "type": "integer",
+        "x-notice": "2016-07-08T09:04:46Z"
+      },
+      "psi_version": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 31
       },
       "loglevel": {
         "type": "string",
@@ -154,7 +169,7 @@
           {
             "type": "boolean",
             "enum": [true, false],
-            "description": "Configures thumbnails behaviour.\n- true : \n    In case of Stream: \n      Thumbnails are created and stored in DVR during of recording. If thumbnail is requested then it will be returned from DVR.\n    In case of VOD:\n      Thumbnails are created and stored in VOD location at thumbnails folder during of VOD opening if they are not created yet.\n      If VOD location is `readonly` then it will be used only for thumbnails searching. Nonthing will be created and stored.  \n\n      If thumbnail is requested then it will be returned from thumbnails folder in VOD location.\n- false : thumbnails are not stored at all. If thumbnail is requested then 403 'Forbidden' error will be returned.\n"
+            "description": "Configures thumbnails behaviour.\n- true : \n    In case of Stream: \n      Thumbnails are created and stored in DVR during the recording. If thumbnail is requested then it will be returned from DVR.\n    In case of VOD:\n      Thumbnails are created and stored in VOD location at thumbnails folder during the VOD opening if they are not created yet.\n      If VOD location is `readonly` then it will be used only for thumbnails searching. Nothing will be created and stored.  \n\n      If thumbnail is requested then it will be returned from thumbnails folder in VOD location.\n- false : thumbnails are not stored at all. If thumbnail is requested then 403 'Forbidden' error will be returned.\n"
           },
           {
             "type": "string",
@@ -165,12 +180,37 @@
       },
       "thumbnails_size_spec": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "width": {
+            "nullable": true,
+            "type": "integer",
+            "description": "The thumbnail width."
+          },
+          "height": {
+            "nullable": true,
+            "type": "integer",
+            "description": "The thumbnail height."
+          }
+        }
       },
       "ad_placement": {
         "type": "string",
         "enum": ["preroll", "midroll"],
         "description": "The advertising placement type."
+      },
+      "session_type": {
+        "type": "string",
+        "enum": [
+          "play",
+          "publish",
+          "ingest",
+          "push",
+          "stream",
+          "muxer",
+          "api",
+          "player",
+          "publisher"
+        ]
       },
       "session_key": {
         "anyOf": [
@@ -244,6 +284,7 @@
           "dvb",
           "decklink",
           "aja",
+          "dektec",
           "v4l",
           "v4l2",
           "playlist",
@@ -266,6 +307,10 @@
           "json_manifest"
         ]
       },
+      "ssl_protocol": {
+        "type": "string",
+        "enum": ["tlsv1", "tlsv1.1", "tlsv1.2"]
+      },
       "segments_container": {
         "type": "string",
         "enum": ["cmaf", "fmp4", "mpegts"]
@@ -279,6 +324,30 @@
             "nullable": true,
             "description": "Unique identifier (or UUID) of the session.",
             "example": "61942414-8c15-4809-8bb6-adf1ae846027"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/session_type"
+              }
+            ],
+            "nullable": true,
+            "example": "play",
+            "description": "The type of the session."
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "61942420-1b2e-4614-8871-a4c6345da31f",
+            "description": "Unique ID of the session's source."
+          },
+          "parent_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "example": "61942426-2501-4962-bbab-a612fd619495",
+            "description": "ID of the parent session, used only for sessions with the stream/substream type"
           },
           "ip": {
             "type": "string",
@@ -344,6 +413,16 @@
             "nullable": true,
             "description": "This flag indicates that TLS (SSL) was used to serve this session.\nIt may be either input (ingest, publish) or output (push, play) session, this flag will be\nfilled for any of them.\n"
           },
+          "ssl_protocol": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ssl_protocol"
+              }
+            ],
+            "nullable": true,
+            "description": "SSL Protocol version.",
+            "example": "tlsv1.2"
+          },
           "dvr": {
             "type": "boolean",
             "nullable": true,
@@ -380,6 +459,16 @@
             "nullable": true,
             "description": "User ID provided by the Middleware authorization backend.",
             "example": "5435"
+          },
+          "max_sessions": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The maximum number of sessions allowed for the given `user_id` by the middleware authorization backend."
+          },
+          "soft_limitation": {
+            "type": "boolean",
+            "default": false,
+            "description": "The flag shows if the soft limitation mode is enabled for the sessions with the given `user_id`."
           },
           "user_name": {
             "type": "string",
@@ -496,7 +585,7 @@
         "enum": ["yuv", "uyvy422", "yuyv422", "yuv422p10", "argb", "rgb48", "v210", "pcm"]
       },
       "frame_app_codec": {
-        "enum": ["mpegts", "frog", "frog_ac3", "object", "eit", "scte35", "empty"],
+        "enum": ["mpegts", "frog", "frog_ac3", "object", "eit", "scte27", "scte35", "empty"],
         "type": "string"
       },
       "frame_codec": {
@@ -605,6 +694,18 @@
             "type": "number",
             "x-notice": "calculated fps for statistic"
           },
+          "closed_captions": {
+            "description": "Parameters of closed captions.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/closed_captions"
+                }
+              ]
+            },
+            "type": "array",
+            "default": []
+          },
           "params": {
             "description": "Detailed description of the track depending on its content.\nFor example, width of a video track and sample rate of an audio track.\n",
             "nullable": true,
@@ -662,7 +763,7 @@
             "example": "eng"
           },
           "bframes": {
-            "description": "Average number of B-frames in a GOP. B-frames contain links to keyframes and P-frames before and after themselves.\nB-frames help to compress the video. However, some players impose limitations on this number: usually no more than 2 B-frames are used.\nThis value also defines the GOP structure - the repeated pattern of frames after the keyframe: P, BP, BBP, or BBBP.\n",
+            "description": "Average number of B-frames in a GOP. B-frames contain links to keyframes and P-frames before and after themselves.\nB-frames help to compress the video. However, some players impose limitations on this number: usually no more than 2 B-frames are used.\nThis value also defines the GOP structure - the repeated pattern of frames after the keyframe: P, BP, BBP, BBBP, or BBBBP.\n",
             "nullable": true,
             "type": "integer",
             "x-notice": "calculated number of bframes for statistic",
@@ -686,7 +787,15 @@
       },
       "track_info_video": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "length_size": {
+            "enum": [2, 4],
+            "default": 4,
+            "type": "integer",
+            "x-notice": "H264 private option",
+            "description": "The size of the length field for H264 bitstream without start codes."
+          }
+        }
       },
       "track_info_video_configurable": {
         "type": "object",
@@ -707,6 +816,22 @@
             "description": "Frame rate (frames per second) - the speed at which a sequence of images is displayed on a screen.\nHigher frame rates capture more images per second, which makes for smoother video.\nThe standard frame rate for color television in the Phase Alternating Line (PAL) format is 25 fps.\nThe standard frame rate for color television in the National Television System Committee (NTSC) format is 29,97 fps\n(a little bit lower than the original frame rate of black and white NTSC television, equal to 30 fps.)\nIf interlaced TV is used, two fields of each frame (with odd-numbered lines and with even-numbered lines) are displayed consequently,\nbut the frame rate is actually not doubled (50 half-frames are still equal to 25 original frames). \n",
             "nullable": true,
             "type": "number"
+          },
+          "pix_fmt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/frame_video_pix_fmt"
+              }
+            ],
+            "default": "yuv420p",
+            "description": "The color model of the video."
+          },
+          "num_refs_frames": {
+            "type": "integer",
+            "maximum": 32,
+            "minimum": 0,
+            "nullable": true,
+            "description": "The number of I-frames to be used for encoding."
           },
           "sar_width": {
             "description": "The first number in SAR - the ratio of the width of the display video representation to the width of the pixel representation.\n",
@@ -738,6 +863,11 @@
             "format": "pixels",
             "nullable": true
           },
+          "level": {
+            "type": "string",
+            "nullable": true,
+            "description": "A set of constraints that indicate a degree of required decoder performance.\nThis parameter is used for compatibility with old devices.\n"
+          },
           "profile": {
             "description": "A specific codec-dependent profile of the output video.\nThe profile allows to assume if the track can be played on a particular device.\n",
             "type": "string",
@@ -762,6 +892,23 @@
           }
         }
       },
+      "closed_captions": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "description": "Language of closed captions.",
+            "type": "string",
+            "nullable": true,
+            "example": "eng"
+          },
+          "name": {
+            "description": "Under what name the audio track will be displayed on the player.",
+            "type": "string",
+            "nullable": true,
+            "example": "English"
+          }
+        }
+      },
       "media_info": {
         "type": "object",
         "properties": {
@@ -774,6 +921,20 @@
               }
             ],
             "example": "stream"
+          },
+          "stream_id": {
+            "nullable": true,
+            "type": "integer",
+            "x-notice": "Will be used as ts_stream_id in mpegts",
+            "example": 253,
+            "description": "The identifier of the transport stream for MPEG TS streams."
+          },
+          "program_id": {
+            "nullable": true,
+            "type": "integer",
+            "x-notice": "Will be used as program id",
+            "example": 110,
+            "description": "The program ID for MPEG TS streams."
           },
           "tracks": {
             "description": "Information about available tracks (video, audio, or text).",
@@ -807,6 +968,254 @@
           }
         }
       },
+      "transcoder_track_info": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/track_info_base_configurable"
+          },
+          {
+            "$ref": "#/components/schemas/track_info_audio"
+          },
+          {
+            "$ref": "#/components/schemas/transcoder_track_info_audio"
+          },
+          {
+            "$ref": "#/components/schemas/transcoder_track_info_video"
+          }
+        ]
+      },
+      "transcoder_track_info_audio": {
+        "type": "object",
+        "properties": {
+          "input_track": {
+            "description": "Input track to be transcoded.\n",
+            "nullable": true,
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": "a1"
+          },
+          "async": {
+            "description": "Resample the input audio to the specified parameters, using the libswresample library (`aresample` option of `ffmpeg`).\n",
+            "externalDocs": {
+              "description": "Find more information here.",
+              "url": "https://ffmpeg.org/ffmpeg-filters.html#aresample-1"
+            },
+            "nullable": true,
+            "type": "integer",
+            "deprecated": true
+          },
+          "input_sample_rate": {
+            "description": "Audio input sample rate.\nUsually, it is autodetected but in some cases, e.g., for HE-AAC coding, we cannot get it correctly, so define manually.\n",
+            "nullable": true,
+            "type": "integer",
+            "deprecated": true
+          },
+          "volume": {
+            "description": "Output audio volume. The value can be specified in decibels (dB) or it can be an integer/float (3, 0.5, etc.).\n\nIf it is just an integer or a float, the output audio volume is calculated by this formula:\n\n`output_volume = volume * input_volume`\n\nIf specified in decibels (dB), the output audio volume is calculated as follows:\n\n`output_volume = input_volume +/- volume`\n\ndepending whether it is a positive (+9dB) or a negative value (-6dB).\n\nBy default it equals to 1 (the input audio volume).\n",
+            "externalDocs": {
+              "description": "Find more information here.",
+              "url": "https://flussonic.com/doc/transcoder/how-to-change-the-volume-level"
+            },
+            "nullable": true,
+            "type": "string",
+            "example": "-6dB"
+          },
+          "split_channels": {
+            "description": "This option allows to split each audio track with multiple channels into several mono tracks.\n",
+            "nullable": true,
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "transcoder_track_info_video": {
+        "type": "object",
+        "properties": {
+          "preset": {
+            "description": "A set of values that determine a certain encoding speed, which influences a compression ratio. \nA slower preset will provide better compression (compression is quality per file size).\n",
+            "externalDocs": {
+              "description": "Find more information here.",
+              "url": "https://flussonic.com/doc/transcoder/#transcoder-preset"
+            },
+            "nullable": true,
+            "default": "veryfast",
+            "enum": ["slow", "medium", "fast", "veryfast", "ultrafast"],
+            "type": "string",
+            "example": "medium"
+          },
+          "profile": {
+            "description": "Limits the output to a specific H.264 profile.",
+            "nullable": true,
+            "enum": ["simple", "baseline", "main", "main10", "high", "high422", "high444"],
+            "type": "string"
+          },
+          "level": {
+            "description": "A set of constraints that indicate a degree of required decoder performance.\nThis parameter is used for compatibility with old devices.\n",
+            "nullable": true,
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/h264_level"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/hevc_level"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mp2v_level"
+                  }
+                ]
+              }
+            ]
+          },
+          "size": {
+            "description": "Target size of the image and the strategy to achieve it.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_size"
+              }
+            ]
+          },
+          "sar": {
+            "description": "Target aspect ratio.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_sar"
+              }
+            ]
+          },
+          "logo": {
+            "description": "The configuration of a logo \"burned\" into the video track.\nThe transcoder adds the logo before the video is resized as specified in the `size` option. \nThis means that the logo can be visibly stretched if the size was changed significantly.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_logo"
+              }
+            ]
+          },
+          "alogo": {
+            "description": "The configuration of a logo added to the video track after the video was resized as specified in the `size` option.\n\nThis prevents the logo picture from stretching that might occur when the `logo` option is used. \nYou will need to prepare and specify a separate file with a logo for each size of the resulting video track.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_logo"
+              }
+            ]
+          },
+          "fps": {
+            "description": "Frame rate (frames per second) - the speed at which a sequence of images is displayed on a screen.\n\nHigher frame rates capture more images per second, which makes for smoother video.\nThe standard frame rate for color television in the Phase Alternating Line (PAL) format is 25 fps.\nThe standard frame rate for color television in the National Television System Committee (NTSC) format is 29,97 fps\n(a little bit lower than the original frame rate of black and white NTSC television, equal to 30 fps.)\nIf interlaced TV is used, two fields of each frame (with odd-numbered lines and with even-numbered lines) are displayed consequently,\nbut the frame rate is actually not doubled (50 half-frames are still equal to 25 original frames).\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_fps"
+              }
+            ]
+          },
+          "refs": {
+            "description": "The number of reference frames in a GOP.\nReference frames are frames of a compressed video that are used to define other frames (P-frames and B-frames).\n",
+            "nullable": true,
+            "maximum": 6,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "gop": {
+            "description": "Sets the number of frames in a GOP.\nThe encoder will create all GOPs of an exactly identical size - as specified in this option.\n",
+            "nullable": true,
+            "type": "integer",
+            "example": 150
+          },
+          "qp_range": {
+            "description": "The ranges of the quantization parameter for different types of frames in a GOP.\n\nQuantization is an algorithm used for video compression. It is based on fragmentation of video frames.\nIncreasing this parameter allows to improve the compression but may lower the picture quality.\nUsually, these ranges are defined automatically by the transcoder, but for some types of transcoders it makes sense to set them manually.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_qp_range"
+              }
+            ]
+          },
+          "threads": {
+            "description": "Number of threads used by the decoder when transcoding with CPU (it is not used for other types of transcoder).\nThis parameter allows to increase performance by adding new threads. By default, it is autodetected.\n",
+            "nullable": true,
+            "type": "integer"
+          },
+          "open_gop": {
+            "description": "Whether open GOP is used. Open GOP contains P-frames that refer to the frames before the keyframe.\nIt allows to decrease bitrate to 5-7%, but can result in breaking the picture.\n",
+            "default": false,
+            "type": "boolean"
+          },
+          "interlace": {
+            "description": "This parameter is used to get an interlaced stream from a progressive one.\nThe allowed values are `true` (interlaced video), `false` (progressive video), or one of the methods for producing interlaced video supported for the selected type of transcoder.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/interlace_settings"
+              }
+            ]
+          },
+          "rc_method": {
+            "description": "A method for creating output video with constant bitrate suitable for broadcasting to television networks.\nThe allowed values are:\n\n* `cbr` - the encoder will produce a DVB-C compliant stream.\n* `vbr` - do not encode a stream to be DVB-C compliant.\n* `cbr2pass` - the encoder will encode the video once in CBR, then it will encode it second time in CBR but using the information from the previous pass to improve quality.\n",
+            "externalDocs": {
+              "description": "Find more information here.",
+              "url": "https://flussonic.com/doc/transcoder/#video-options"
+            },
+            "nullable": true,
+            "enum": ["vbr", "cbr", "cbr2pass"],
+            "type": "string"
+          },
+          "temporal_tradeoff": {
+            "description": "Drop some frames in dynamic scenes when the transcoder does not have time to code all frames.\nThe allowed values are: \n\n* `15` - drop 1 from 5\n* `13` - drop 1 from 3\n* `12` - drop 1 from 3\n* `23` - drop 2 from 3\n* `0` - do not drop frames\n",
+            "nullable": true,
+            "type": "integer"
+          },
+          "vbv_bufsize": {
+            "description": "Virtual buffer size, it bits. The default value is `gop / fps * bitrate`.\n",
+            "nullable": true,
+            "type": "integer"
+          },
+          "resize_mode": {
+            "description": "The mode to be used for resizing video tracks. It is one of the computing platforms for Flussonic Coder:\n\n* vic -  Video Image Converter, specific for Jetson Nvidia\n* cuda - CUDA (or Compute Unified Device Architecture)\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/transcoder_resize_mode"
+              }
+            ]
+          },
+          "burn": {
+            "description": "Configuration of burn-in text, timestamp, or subtitles to video frames.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_burn"
+              }
+            ]
+          },
+          "extra": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "description": "Some additional options."
+          }
+        }
+      },
       "webrtc_prefer_codec": {
         "type": "string",
         "enum": ["h264", "vp8", "vp9", "av1"]
@@ -814,6 +1223,10 @@
       "webrtc_transport": {
         "type": "string",
         "enum": ["udp", "tcp"]
+      },
+      "output_audio": {
+        "type": "string",
+        "enum": ["keep", "aac", "add_aac"]
       },
       "h264_level": {
         "enum": [
@@ -891,6 +1304,40 @@
           }
         ]
       },
+      "tc_label_box": {
+        "type": "object",
+        "properties": {
+          "borderw": {
+            "description": "The width, in pixel, of the border to be drawn around the text, timestamp, or subtitles.",
+            "nullable": true,
+            "type": "integer",
+            "example": 10
+          },
+          "color": {
+            "description": "Box color.",
+            "nullable": true,
+            "anyOf": [
+              {
+                "type": "string",
+                "examples": ["black", "white"]
+              },
+              {
+                "type": "string",
+                "format": "hexcolor",
+                "example": "#d62d20"
+              }
+            ]
+          },
+          "alpha": {
+            "description": "Box opacity (use values from 0.1 to 1.0, 0.0 - completely transparent, 1.0 - completely opaque).",
+            "nullable": true,
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "example": 0
+          }
+        }
+      },
       "tc_label_font": {
         "type": "object",
         "properties": {
@@ -912,7 +1359,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "example": ["black", "white"]
+                "examples": ["black", "white"]
               },
               {
                 "type": "string",
@@ -961,6 +1408,15 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/tc_label_font"
+              }
+            ]
+          },
+          "box": {
+            "description": "Parameters of the box around the text, timestamp, or subtitles.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_label_box"
               }
             ]
           }
@@ -1052,6 +1508,28 @@
           }
         }
       },
+      "tc_crop": {
+        "type": "object",
+        "properties": {
+          "left": {
+            "description": "The `x` coordinate of the upper-left corner of the output video withing the input video.",
+            "type": "integer"
+          },
+          "top": {
+            "description": "The `y` coordinate of the upper-left corner of the output video withing the input video.",
+            "type": "integer"
+          },
+          "width": {
+            "description": "The width of the output video.",
+            "type": "integer"
+          },
+          "height": {
+            "description": "The height of the output video.",
+            "type": "integer"
+          }
+        },
+        "required": ["left", "top", "width", "height"]
+      },
       "deinterlace_settings": {
         "anyOf": [
           {
@@ -1132,6 +1610,15 @@
             "deprecated": true,
             "type": "boolean",
             "example": true
+          },
+          "crop": {
+            "description": "Video cropping options.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_crop"
+              }
+            ]
           },
           "drop_frame_interval": {
             "description": "This parameter is applicable for NVIDIA Jetson transcoder only.\nThis is the number of frames after wich the decoder skips a frame and, thus, allows to save the resources. For example:\n\n* 1 - sip each frame\n* 2 - skip each second frame\n* 3 - skip each third frame, etc.\n\nThis option can be useful for streams with high FPS (e.g., 60) as it allows to increase the bandwidth.\n",
@@ -1218,6 +1705,65 @@
             "nullable": true,
             "type": "boolean",
             "default": false
+          }
+        }
+      },
+      "tc_size": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "description": "The picture width in pixels on the display where it will be played by a player.\nIf you need to insert a web-player into a web page, use this value for choosing the player size.\n",
+            "nullable": true,
+            "type": "integer"
+          },
+          "height": {
+            "description": "The picture height in pixels on the display where it will be played by a player.\nIf you need to insert a web-player into a web page, use this value for choosing the player size.\n",
+            "nullable": true,
+            "type": "integer"
+          },
+          "strategy": {
+            "description": "The algorithm of the picture resizing: crop, scale, or fit.\n",
+            "default": "fit",
+            "enum": ["crop", "scale", "fit"],
+            "type": "string",
+            "example": "crop"
+          },
+          "background": {
+            "description": "The color of the area in the player that is not occupied by the video after resizing. \nIt is used only with the 'fit' strategy.\n",
+            "nullable": true,
+            "anyOf": [
+              {
+                "enum": ["blur"],
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "format": "hexcolor"
+              }
+            ]
+          }
+        }
+      },
+      "tc_sar": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "description": "The first number in SAR - the ratio of the width of the display video representation to the width of the pixel representation.\n",
+            "externalDocs": {
+              "description": "Find more information here.",
+              "url": "https://flussonic.com/doc/transcoder/#video-options"
+            },
+            "nullable": true,
+            "type": "integer"
+          },
+          "y": {
+            "description": "The second number in SAR - the ratio of the width of the display video representation to the width of the pixel representation.\n",
+            "externalDocs": {
+              "description": "Find more information here",
+              "url": "https://flussonic.com/doc/transcoder/#video-options"
+            },
+            "nullable": true,
+            "type": "integer"
           }
         }
       },
@@ -1380,6 +1926,24 @@
               }
             ]
           },
+          "size": {
+            "description": "Target size of the image and the strategy to achieve it.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_size"
+              }
+            ]
+          },
+          "sar": {
+            "description": "Target aspect ratio.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tc_sar"
+              }
+            ]
+          },
           "logo": {
             "description": "The configuration of a logo \"burned\" into the video track.\nThe transcoder adds the logo before the video is resized as specified in the `size` option. \nThis means that the logo can be visibly stretched if the size was changed significantly.\n",
             "nullable": true,
@@ -1408,7 +1972,7 @@
             ]
           },
           "bframes": {
-            "description": "Number of B-frames in a GOP. B-frames contain links to keyframes and P-frames before and after themselves.\nB-frames help to compress the video. However, some players impose limitations on this number: usually no more than 2 B-frames are used.\nThis value also defines the GOP structure - the repeated pattern of frames after the keyframe: P, BP, BBP, or BBBP.\n\nWhen set to 0, this option disables b-frames. This may be necessary, for example, when broadcasting to RTSP.\n",
+            "description": "Number of B-frames in a GOP. B-frames contain links to keyframes and P-frames before and after themselves.\nB-frames help to compress the video. However, some players impose limitations on this number: usually no more than 2 B-frames are used.\nThis value also defines the GOP structure - the repeated pattern of frames after the keyframe: P, BP, BBP, BBBP, or BBBBP.\n\nWhen set to 0, this option disables b-frames. This may be necessary, for example, when broadcasting to RTSP.\n",
             "nullable": true,
             "enum": [0, 1, 2, 3, 4],
             "type": "integer",
@@ -1492,6 +2056,14 @@
                 "$ref": "#/components/schemas/tc_burn"
               }
             ]
+          },
+          "extra": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "description": "Some additional options."
           }
         },
         "required": ["track"]
@@ -1544,6 +2116,18 @@
             },
             "type": "array",
             "default": []
+          },
+          "tracks": {
+            "description": "Info on the tracks.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/transcoder_track_info"
+                }
+              ]
+            },
+            "type": "array",
+            "default": []
           }
         }
       },
@@ -1569,6 +2153,10 @@
             "example": 28800
           }
         }
+      },
+      "dvr_motion_event": {
+        "type": "object",
+        "properties": {}
       },
       "dvr_base_config": {
         "type": "object",
@@ -1649,6 +2237,11 @@
               [800, 1600],
               [2200, 130]
             ]
+          },
+          "dvr_offline": {
+            "description": "If this option is enabled, Flussonic detects DVR at the start of the stream,\nbut does not start recording immediately and waits for external API request.\n",
+            "type": "boolean",
+            "nullable": true
           },
           "copy": {
             "description": "The URL of another storage to copy the blobs (hours of the archive) into. \nCopying is done when a blob is complete (i.e., once an hour), and therefore helps significantly reduce the number of network requests to a cloud storage.\n",
@@ -1906,6 +2499,22 @@
             "format": "seconds",
             "nullable": true,
             "example": 3600
+          },
+          "disk_limit": {
+            "type": "integer",
+            "format": "bytes",
+            "nullable": true,
+            "deprecated": true,
+            "x-alias": "storage_limit",
+            "description": "Maximum disk consumption. Replaced by `storage_limit` in newer versions."
+          },
+          "time_limit": {
+            "type": "integer",
+            "format": "seconds",
+            "nullable": true,
+            "deprecated": true,
+            "x-alias": "expiration",
+            "description": "Segment expiration period. Replaced by `expiration` in newer versions."
           }
         }
       },
@@ -2086,6 +2695,36 @@
         },
         "required": ["pid", "content", "track"]
       },
+      "vision_spec": {
+        "type": "object",
+        "properties": {
+          "gpu": {
+            "description": "The number of a video card where video analytic is performed, starts from 0.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/binary_int"
+              }
+            ],
+            "nullable": true,
+            "example": 1
+          },
+          "alg": {
+            "description": "The algorithm used for video analytics. The allowed values are:\n\n* `faces` - for face recognition\n* `plates` - for license plate recognition (the default value)\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/binary_value"
+              }
+            ],
+            "nullable": true,
+            "example": "faces"
+          },
+          "areas": {
+            "description": "This parameter allows you to select specific polygonal area(s) to detect license plates (works only for `alg = plates`).\nBy default, it is empty and the recognition system searches for license plates over all the camera field of view.\n\nEach area is specified as a sequence of comma-separated coordinates of vertices of the polygon: `x0,y0,x1,y1,x2,y2,...`.\nThe vertices are specified in a counter-clockwise direction. Multiple areas are separated by `:`.\n",
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "auth_spec": {
         "type": "object",
         "properties": {
@@ -2164,6 +2803,14 @@
             "type": "array",
             "nullable": true,
             "example": ["name", "token", "proto", "ip"]
+          },
+          "extra": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "description": "Some additional options."
           }
         }
       },
@@ -2180,6 +2827,16 @@
       "stream_stats_base": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "format": "media_name",
+            "nullable": true,
+            "example": "hockey1",
+            "deprecated": true,
+            "description": "Stream name.",
+            "x-notice": "Duplicate of stream name.",
+            "x-delete-at": "22.02"
+          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -2208,8 +2865,44 @@
             "nullable": true,
             "example": 1636383729002
           },
+          "status": {
+            "description": "Indicates the status of the stream.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/stream_status"
+              }
+            ],
+            "nullable": true
+          },
           "backup_running": {
             "description": "Whether a backup is currently running.",
+            "type": "boolean",
+            "nullable": true
+          },
+          "dvr_enabled": {
+            "description": "If DVR is enabled for the stream.",
+            "default": true,
+            "type": "boolean",
+            "nullable": true
+          },
+          "dvr_info": {
+            "description": "The information about the recorded DVR archive.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/dvr_info"
+              }
+            ],
+            "nullable": true
+          },
+          "dvr_replication": {
+            "description": "If DVR replication is enabled for the stream.\nReplication means that a DVR archive is stored on two (or more) Flussonic servers for reliability.\n",
+            "type": "integer",
+            "format": "percents",
+            "nullable": true
+          },
+          "dvr_replication_running": {
+            "description": "If DVR replication is in progress for the stream.\nReplication means that a DVR archive is stored on two (or more) Flussonic servers for reliability.\n",
+            "default": false,
             "type": "boolean",
             "nullable": true
           },
@@ -2235,6 +2928,190 @@
             ],
             "description": "Technical information about the output media content.",
             "nullable": true
+          },
+          "alive": {
+            "default": false,
+            "type": "boolean",
+            "nullable": true,
+            "example": true,
+            "description": "Becomes `false` when `ts_delay` > 12000 (= 12 seconds)"
+          },
+          "ts_delay": {
+            "type": "number",
+            "format": "ticks",
+            "nullable": true,
+            "example": 1284,
+            "description": "The time period during which no frames were received from the stream's input."
+          },
+          "remote": {
+            "default": false,
+            "type": "boolean",
+            "nullable": true,
+            "deprecated": true,
+            "x-notice": "Used only for grouping the streams in UI.",
+            "description": "If the stream is not local, i.e. sourced from the remote server."
+          },
+          "source_hostname": {
+            "type": "string",
+            "format": "server_name",
+            "nullable": true,
+            "deprecated": true,
+            "x-notice": "Used only for grouping the streams in UI.",
+            "description": "URL of the stream source."
+          },
+          "published_from": {
+            "type": "string",
+            "nullable": true,
+            "deprecated": true,
+            "description": "IP address of the source of publication to Flussonic."
+          },
+          "published_via": {
+            "type": "string",
+            "nullable": true,
+            "deprecated": true,
+            "description": "The protocol used for publication to Flussonic.",
+            "example": "rtmp"
+          },
+          "url": {
+            "type": "string",
+            "format": "url",
+            "nullable": true,
+            "deprecated": true,
+            "description": "The stream URL."
+          },
+          "source_error": {
+            "type": "string",
+            "nullable": true,
+            "deprecated": true,
+            "example": "frame_drop",
+            "description": "Error code showing if there are any problems with capturing the stream."
+          },
+          "input_error_rate": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The number of packets dropped per second."
+          },
+          "coder_error": {
+            "default": false,
+            "type": "boolean",
+            "nullable": true,
+            "description": "Shows if there was any encoding error."
+          },
+          "lifetime": {
+            "type": "number",
+            "format": "milliseconds",
+            "nullable": true,
+            "description": "The time period in seconds during which the stream is being captured."
+          },
+          "retry_count": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The number of attempts to restore the stream if `alive=false`."
+          },
+          "client_count": {
+            "type": "integer",
+            "format": "client_count",
+            "nullable": true,
+            "description": "The number of clients receiving the stream."
+          },
+          "last_access_at": {
+            "type": "number",
+            "format": "utc_ms",
+            "nullable": true,
+            "description": "Date and time the stream was accessed the last time."
+          },
+          "bytes_in": {
+            "type": "integer",
+            "format": "bytes",
+            "nullable": true,
+            "description": "The amount of stream data received from the input."
+          },
+          "bytes_out": {
+            "type": "integer",
+            "format": "bytes",
+            "nullable": true,
+            "description": "The amount of stream data sent to the clients."
+          },
+          "out_bandwidth": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "The output traffic of the stream."
+          },
+          "bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "Stream bitrate."
+          },
+          "input_bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "Input bitrate."
+          },
+          "output_bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "Stream output bitrate."
+          },
+          "current_agent_id": {
+            "type": "string",
+            "format": "agent_id",
+            "nullable": true,
+            "description": "The identifier of the Agent that is currently serving the stream."
+          },
+          "agent_status": {
+            "enum": ["connected", "not_connected", "rproxy_not_configured"],
+            "type": "string",
+            "nullable": true,
+            "description": "The status of the Agent serving the stream."
+          },
+          "running_transcoder": {
+            "default": false,
+            "type": "boolean",
+            "nullable": true,
+            "description": "If the transcoder is enabled for the stream."
+          },
+          "transcoder_overloaded": {
+            "default": false,
+            "type": "boolean",
+            "nullable": true,
+            "description": "If the transcoder is overloaded."
+          },
+          "input_media_info": {
+            "description": "Information about the media.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/media_info"
+              }
+            ],
+            "deprecated": true,
+            "nullable": true
+          },
+          "running": {
+            "default": true,
+            "deprecated": true,
+            "type": "boolean",
+            "nullable": true,
+            "description": "Shows if the stream is ready to be served to clients. Replaced with `status = running` in newer versions."
+          },
+          "start_running_at": {
+            "type": "number",
+            "format": "utc_ms",
+            "nullable": true,
+            "description": "Date and time when `status = running` was set."
+          },
+          "running_on": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "server_name"
+            },
+            "description": "List of servers hostnames where the stream is running on.",
+            "nullable": true,
+            "example": ["streamer1.example.com"]
           },
           "inputs": {
             "description": "Detailed runtime information about the input streams. To be removed in version 21.12 of Flussonic.",
@@ -2263,8 +3140,43 @@
             "nullable": true,
             "deprecated": true,
             "x-delete-at": "21.12"
+          },
+          "push_stats": {
+            "description": "Statistics of the push from Flussonic.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/push_stats"
+                }
+              ]
+            },
+            "type": "array",
+            "nullable": true,
+            "deprecated": true,
+            "x-alias": "pushes",
+            "x-delete-at": "21.12"
           }
         }
+      },
+      "stream_status": {
+        "type": "string",
+        "oneOf": [
+          {
+            "title": "Running",
+            "const": "running",
+            "description": "Input is OK, stream is ready to be served to your audience."
+          },
+          {
+            "title": "Waiting",
+            "const": "waiting",
+            "description": "Flussonic awaits for input (publish) or it's an 'on demand' stream waiting for client."
+          },
+          {
+            "title": "Error",
+            "const": "error",
+            "description": "Something is wrong and Flussonic is not able to serve the stream to your audience."
+          }
+        ]
       },
       "pusher_status": {
         "anyOf": [
@@ -2388,6 +3300,9 @@
           },
           {
             "$ref": "#/components/schemas/stream_config_additional"
+          },
+          {
+            "$ref": "#/components/schemas/stream_config_onvif"
           }
         ]
       },
@@ -2823,13 +3738,32 @@
             "x-scope": ["flussonic"]
           },
           "cache": {
-            "description": "Configuraton of DVR cache.",
+            "description": "Configuration of DVR cache.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/cache_spec"
               }
             ],
             "nullable": true,
+            "x-scope": ["flussonic"]
+          },
+          "meta": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "description": "Some additional options.",
+            "x-scope": ["flussonic"]
+          },
+          "vision": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/vision_spec"
+              }
+            ],
+            "nullable": true,
+            "description": "Video analytics parameters.",
             "x-scope": ["flussonic"]
           }
         }
@@ -2911,6 +3845,109 @@
             "type": "string",
             "nullable": true,
             "x-scope": ["flussonic"]
+          },
+          "aac_ab": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Bitrate of the AAC audio track.",
+            "x-scope": ["flussonic"]
+          },
+          "output_audio": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/output_audio"
+              }
+            ],
+            "nullable": true,
+            "description": "Audio transcoding options.",
+            "x-scope": ["flussonic"]
+          },
+          "prefer_codec": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/webrtc_prefer_codec"
+              }
+            ],
+            "nullable": true,
+            "description": "Preferred codec for WebRTC.",
+            "x-scope": ["flussonic"]
+          },
+          "transport": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/webrtc_transport"
+              }
+            ],
+            "nullable": true,
+            "description": "Transport protocol for WebRTC.",
+            "x-scope": ["flussonic"]
+          },
+          "max_bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "Maximum bitrate for WebRTC.",
+            "x-scope": ["flussonic"]
+          },
+          "min_bitrate": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Minimum bitrate for WebRTC.",
+            "x-scope": ["flussonic"]
+          },
+          "frames_timeout": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Specifies the period of time, in seconds, \nfor which Flussonic Media Server waits for new frames to come from the data source \nbefore it generates the `frames_timed_out` event that informs you that the source might soon be lost. \nThis period of time must be smaller than `source_timeout`. \nIf frames come again from this source, before `source_timeout` has passed, Flussonic issues the `frames_restored` event.\n",
+            "x-scope": ["flussonic"]
+          },
+          "abr_stepup": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Increment step for raising the bitrate to the maximum, in percent. The default step is 30%. \nIf the loss is less than `abr_loss_lower`, \nFlussonic makes the publisher to step up from the current bitrate to the maximum one with the rate of `abr_stepup percent`.\n",
+            "x-scope": ["flussonic"]
+          },
+          "abr_correction": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The correction between the target bitrate (Receiver Estimated Maximum Bitrate, calculated in Flussonic) and browser bitrate, in kbit/s.\nFlussonic sends the target bitrate to the browser from which the publication is carried out so that the browser adjusts the bitrate of the publication by this value.\nThe default value is 300 kbit/s.\n",
+            "x-scope": ["flussonic"]
+          },
+          "abr_loss_lower": {
+            "type": "number",
+            "nullable": true,
+            "description": "The lower limit of packet loss. When it is reached, Flussonic raises the bitrate. \nThat is, if packet loss is less than `abr_loss_lower`, Flussonic makes the publisher to step up from the current bitrate to the maximum one with the rate of `abr_stepup` percent.\n",
+            "x-scope": ["flussonic"]
+          },
+          "abr_loss_upper": {
+            "type": "number",
+            "nullable": true,
+            "description": "The upper limit of packet loss. When it is reached, Flussonic reduces the bitrate. \nThat is, if packet loss is greater than `abr_loss_upper`, Flussonic makes the publisher to reduce the current bitrate in steps with the maximum rate of `abr_stepdown` percent.\n",
+            "x-scope": ["flussonic"]
+          },
+          "abr_stepdown": {
+            "type": "number",
+            "nullable": true,
+            "description": "A step of reducing the bitrate to the minimum. \nIf packet losses are greater than `abr_loss_upper`, Flussonic makes the publisher to reduce the current bitrate in steps with the maximum rate of `abr_stepdown` percent.\n",
+            "x-scope": ["flussonic"]
+          },
+          "abr_mode": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The algorithm for determining the need to change the bitrate of the published stream and for calculating the target bitrate. \nTwo options are possible:\n\n* `abr_mode=0` - This mode takes into account the packet losses, target bitrate, browser bitrate and the number of auto-adjustment cycles.\n* `abr_mode=1` - This mode considers only packet losses and target bitrate.\n",
+            "x-scope": ["flussonic"]
+          },
+          "abr_debug": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Whether adaptive bitrate process is logged.",
+            "x-scope": ["flussonic"]
+          },
+          "abr_cycles": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The number of cycles of bitrate auto-adjustment.\nAfter the specified number of auto-adjustment cycles passes, Flussonic considers the bitrate to be optimal, and it is no longer analyzed. \nBy default, `abr_cycles`=5. \nIf `abr_cycles`=0, the adjustment process takes place all the time while the publication lasts.\n",
+            "x-scope": ["flussonic"]
           }
         }
       },
@@ -2946,6 +3983,10 @@
             "nullable": true
           }
         }
+      },
+      "stream_config_onvif": {
+        "type": "object",
+        "properties": {}
       },
       "template_config": {
         "allOf": [
@@ -3173,6 +4214,111 @@
           }
         ]
       },
+      "listeners": {
+        "type": "object",
+        "properties": {
+          "http": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/listen_http_config"
+                }
+              ]
+            },
+            "default": [],
+            "description": "List of HTTP ports or `host:port` pairs that will be used for listening.",
+            "example": [80]
+          },
+          "https": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/listen_https_config"
+                }
+              ]
+            },
+            "default": [],
+            "description": "List of HTTPS ports or `host:port` pairs that will be used for listening.",
+            "example": [443]
+          }
+        }
+      },
+      "listen_config": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "integer",
+            "format": "network_port",
+            "description": "Port that will be used for listening.",
+            "example": 80,
+            "x-primary-key": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true,
+            "description": "Network address that will be used for listening.",
+            "example": "10.0.35.1"
+          }
+        },
+        "required": ["port"]
+      },
+      "listen_ssl_config": {
+        "type": "object",
+        "properties": {
+          "ssl_protocols": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/tls_version"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "List of SSL protocol versions that will be used for listening.",
+            "example": ["tlsv1.1", "tlsv1.2"]
+          }
+        }
+      },
+      "listen_http_config": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/listen_config"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "api": {
+                "type": "boolean",
+                "nullable": true,
+                "description": "If false, listener do not serve api calls."
+              }
+            }
+          }
+        ]
+      },
+      "listen_https_config": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/listen_config"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "api": {
+                "type": "boolean",
+                "nullable": true,
+                "description": "If false, listener do not serve api calls."
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/listen_ssl_config"
+          }
+        ]
+      },
       "session_key_query": {
         "type": "string"
       },
@@ -3265,6 +4411,15 @@
             "type": "boolean",
             "nullable": true,
             "example": true
+          },
+          "dvr_info": {
+            "description": "Information about DVR stored on disk.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/dvr_info"
+              }
+            ],
+            "nullable": true
           }
         }
       },
@@ -3492,6 +4647,9 @@
             "$ref": "#/components/schemas/stream_input_fake"
           },
           {
+            "$ref": "#/components/schemas/stream_input_file"
+          },
+          {
             "$ref": "#/components/schemas/stream_input_h323"
           },
           {
@@ -3613,12 +4771,53 @@
             "nullable": true,
             "description": "Mode to describe the interconnection with a DVR on a remote server.\nAllows to chain requests to other servers or read-only from a peer.\n",
             "x-scope": ["flussonic"]
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "description": "An array of additional properties for customization of the request headers."
+          },
+          "no_clients_reconnect_delay": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Skip input start if the stream has no clients."
+          },
+          "allow_if": {
+            "type": "string",
+            "nullable": true,
+            "description": "Path to a file. The input will be allowed if you put `1` in the file, or denied if `0` (reverse logic to `deny_if`).\nThis option allows you to manage inputs without API requests.\n\nFor example, your stream has two inputs and you set `allow_if = /path/to/file` for the first input.\nThe `/path/to/file` file contains only the digit `1`. That means that the first input is used when you play the stream.\nWhen you put `0` to the `/path/to/file` file, the first input is denied, so the second one is played.\n\nIf no such file, the input is allowed.\n"
+          },
+          "deny_if": {
+            "type": "string",
+            "nullable": true,
+            "description": "Path to a file. The input will be denied if you put `1` in the file, or allowed if `0` (reverse logic to `allow_if`).\nThis option allows you to manage inputs without API requests.\n\nFor example, your stream has two inputs and you set `deny_if = /path/to/file` for the first input.\nThe `/path/to/file` file contains only the digit `1`. \nThat means that the first input will not be used when you play the stream, so the second one will.\nWhen you put `0` to the `/path/to/file` file, the first input is allowed to be played.\n\nIf no such file, the input is allowed.\n"
           }
         }
       },
       "stream_input_deprecated": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "buffer_length": {
+            "type": "integer",
+            "deprecated": true,
+            "nullable": true,
+            "x-delete-at": 22.01,
+            "description": "The number of video frames in the buffer."
+          },
+          "aac": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/binary_boolean"
+              }
+            ],
+            "nullable": true,
+            "x-notice": "used in rtsp_source instead of rtsp2",
+            "description": "Enables transcoding to the AAC codec for the audio track of the input."
+          }
+        }
       },
       "stream_input_fake": {
         "type": "object",
@@ -3632,24 +4831,79 @@
             "type": "integer",
             "nullable": true,
             "description": "Height of an artificially created test video stream. \nApplicable to the `fake://fake` URL.\n"
+          },
+          "bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "Bitrate of an artificially created test video stream. \nApplicable to the `fake://fake` URL.\n"
           }
         }
       },
-      "stream_input_h323": {
+      "stream_input_file": {
         "type": "object",
         "properties": {}
+      },
+      "stream_input_h323": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true,
+            "description": "H323 input ID."
+          },
+          "video_bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "H323 input bitrate."
+          },
+          "audio_bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "H323 audio bitrate."
+          },
+          "connections": {
+            "type": "integer",
+            "nullable": true,
+            "description": "H323 connections."
+          }
+        }
       },
       "stream_input_hls": {
         "type": "object",
         "properties": {
+          "buffer": {
+            "type": "integer",
+            "nullable": true,
+            "deprecated": true,
+            "description": "HLS segments buffer. Forces to collect extra N segments first. Useful at bad connections, but increases the lag."
+          },
+          "stall_check": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/binary_boolean"
+              }
+            ],
+            "nullable": true,
+            "description": "Enables the check for input stalling. \nYou may set `true` for default values `60000/1000/75` or set your own values as `depth/period/percentage`.\nThe algorithm counts the number of `period`s in the `depth` when at least one frame was received from the input.\nIf the number of such `period`s is less than `percentage`, the input will be reconnected.\n\nFor example, default values mean that the input is reconnected when frames are received in\nless than 75% of seconds (1000 ms) during the minute (60000 ms).      \n",
+            "example": "60000/1000/75"
+          },
           "skip_stalled_check": {
-            "description": "By default Flussonic uses the `stalled_check` option that protects it from playing outdated segments.\nWhen this option is enabled Flussonic Media Server will wait for at least 2-3 new segments before making stream available.\n\nThis parameter allows to disable this protection. Use it at your own risk - with it enabled, old content might be repeated over and over.\n",
+            "description": "By default Flussonic uses the `stall_check` option that protects it from playing outdated segments.\nWhen this option is enabled Flussonic Media Server will wait for at least 2-3 new segments before making stream available.\n\nThis parameter allows to disable this protection. Use it at your own risk - with it enabled, old content might be repeated over and over.\n",
             "allOf": [
               {
                 "$ref": "#/components/schemas/binary_boolean"
               }
             ],
             "nullable": true
+          },
+          "ad": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Alias for `scte35`. Enables the ad injection.",
+            "deprecated": true
           }
         }
       },
@@ -3934,6 +5188,15 @@
             "nullable": true,
             "example": "drop"
           },
+          "closed_captions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "x-key-type": "binary",
+            "description": "The rules for handling the closed captions.\n"
+          },
           "dvbsubs_ocr": {
             "description": "This option turns on the DVB subtitle OCR feature.\nIf it is enabled, the resulting track with text subtitles replaces the track with DVB subtitles in an output stream.\nThis option is now deprecated (replaced by `subtitles=ocr_replace`) and supported only for backward compatibility.\n",
             "allOf": [
@@ -3948,6 +5211,15 @@
             "type": "boolean",
             "nullable": true,
             "example": true
+          },
+          "languages": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "x-key-type": "mpegts_lang_track",
+            "description": "An array of MPEG-TS language descriptors in format `[{key: track, value: language}]`\n"
           }
         }
       },
@@ -4043,6 +5315,11 @@
             "type": "string",
             "nullable": true,
             "example": "dts"
+          },
+          "audio_add": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Moves audio timestamp forwards or backwards on a specified number of milliseconds."
           }
         }
       },
@@ -4243,8 +5520,25 @@
         "required": ["vendor"]
       },
       "named_by": {
-        "enum": ["config", "user", "remote"],
-        "type": "string"
+        "type": "string",
+        "oneOf": [
+          {
+            "const": "config",
+            "description": "Media is described in file on local disk"
+          },
+          {
+            "const": "user",
+            "description": "Media was started and configured by user request: play or publish\n"
+          },
+          {
+            "const": "remote",
+            "description": "Media was sourced from another streamer via `source` directive"
+          },
+          {
+            "const": "external",
+            "description": "Media was configured via config_external backend"
+          }
+        ]
       },
       "backup_config": {
         "type": "object",
@@ -4324,6 +5618,93 @@
             ]
           }
         ]
+      },
+      "dvr_info": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "integer",
+            "format": "utc",
+            "nullable": true,
+            "description": "The UTC timestamp of the first recording in this archive.",
+            "example": 1641045644
+          },
+          "depth": {
+            "type": "integer",
+            "format": "seconds",
+            "nullable": true,
+            "description": "The time interval between the start of the *first* recording segment and the end of the *last* one.",
+            "example": 259200
+          },
+          "ranges": {
+            "description": "The list of DVR ranges.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/dvr_range"
+                }
+              ]
+            },
+            "type": "array",
+            "nullable": true
+          },
+          "locks": {
+            "description": "The list of DVR locks.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/dvr_range"
+                }
+              ]
+            },
+            "type": "array",
+            "nullable": true
+          },
+          "motion_log": {
+            "description": "The list of events from the motion detector (if it is enabled).",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/dvr_motion_event"
+                }
+              ]
+            },
+            "type": "array",
+            "nullable": true
+          },
+          "brief_thumbnails": {
+            "items": {
+              "type": "integer",
+              "format": "utc"
+            },
+            "type": "array",
+            "nullable": true,
+            "deprecated": true,
+            "x-delete-at": 22.02,
+            "description": "Alias for `thumbnails`."
+          },
+          "bytes": {
+            "description": "The size of the recorded archive.",
+            "type": "integer",
+            "format": "bytes",
+            "nullable": true,
+            "example": 129600000000
+          },
+          "disk_size": {
+            "description": "The size of the disk where the archive is recorded.",
+            "type": "integer",
+            "format": "bytes",
+            "nullable": true,
+            "example": 1099511627776
+          },
+          "duration": {
+            "type": "integer",
+            "format": "seconds",
+            "nullable": true,
+            "description": "A total duration of the recorded segments, excluding recording gaps.",
+            "example": 172800
+          }
+        }
       },
       "cluster_ingest_config": {
         "type": "object",
@@ -4512,6 +5893,624 @@
         ],
         "type": "string"
       },
+      "transponder_push": {
+        "properties": {
+          "url": {
+            "description": "Push URL for the MPTS stream. Usually it is a `udp://` multicast address and port.\n",
+            "type": "string"
+          },
+          "multicast_loop": {
+            "description": "The multicast socket option that enables ingesting the sent data back to the transponder.\nUse for test purposes, e.g. if the same server creates MTPS and splits MPTS to separate programs.\n",
+            "type": "boolean",
+            "default": true
+          },
+          "tos": {
+            "description": "ToS byte in the IP packages of the multicasted data.",
+            "type": "integer",
+            "default": 0
+          }
+        },
+        "required": ["url"],
+        "type": "object"
+      },
+      "ts_descriptor": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "integer",
+            "description": "Identifier of the descriptor."
+          },
+          "hex": {
+            "type": "string",
+            "format": "hexbinary",
+            "description": "Descriptor data."
+          }
+        },
+        "required": ["tag", "hex"]
+      },
+      "ts_timeouts": {
+        "properties": {
+          "service_type": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The type of the program."
+          },
+          "media_info": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The timeout value."
+          }
+        },
+        "type": "object"
+      },
+      "ts_service_type": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string",
+            "enum": [
+              "none",
+              "digital_tv",
+              "digital_radio",
+              "teletext",
+              "nvod_reference",
+              "nvod_shifted",
+              "mosaic",
+              "fm_radio",
+              "dvb_srm",
+              "digital_radio_aac",
+              "mosaic_avc",
+              "data",
+              "common_interface",
+              "rcs_map",
+              "rcs_fls",
+              "dvb_mhp",
+              "digital_tv_mpeg2_hd",
+              "digital_tv_avc_sd",
+              "nvod_shifted_avc_sd",
+              "nvod_reference_avc_sd",
+              "digital_tv_avc_hd",
+              "digital_tv_avc_stereo_hd",
+              "nvod_shifted_avc_stereo_hd",
+              "nvod_reference_avc_stereo_hd",
+              "digital_tv_hevc",
+              "digital_tv_hevc_uhd"
+            ]
+          }
+        ]
+      },
+      "ts_versions": {
+        "properties": {
+          "psi": {
+            "description": "Global version for all PSI tables.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/psi_version"
+              }
+            ],
+            "nullable": true
+          },
+          "pat": {
+            "description": "The version of PAT table.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/psi_version"
+              }
+            ],
+            "nullable": true
+          },
+          "pmt": {
+            "description": "The version of PMT table.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/psi_version"
+              }
+            ],
+            "nullable": true
+          },
+          "nit": {
+            "description": "The version of NIT table.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/psi_version"
+              }
+            ],
+            "nullable": true
+          },
+          "sdt": {
+            "description": "The version of SDT table.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/psi_version"
+              }
+            ],
+            "nullable": true
+          },
+          "cat": {
+            "description": "The version of CAT table.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/psi_version"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "transponder_time_offset": {
+        "properties": {
+          "country": {
+            "description": "The country code.",
+            "type": "string"
+          },
+          "region": {
+            "description": "The region code.",
+            "type": "integer"
+          },
+          "time_of_change": {
+            "description": "Date and time when the time change takes place.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/iso8601"
+              }
+            ],
+            "nullable": true
+          },
+          "local_time_offset": {
+            "description": "The current offset time from UTC.",
+            "type": "string",
+            "nullable": true
+          },
+          "next_time_offset": {
+            "description": "The next offset time after the change.",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["country"],
+        "type": "object"
+      },
+      "ts_eit_intervals": {
+        "properties": {
+          "actual": {
+            "description": "Period for the actual transponder.",
+            "type": "integer",
+            "nullable": true
+          },
+          "other": {
+            "description": "Period for the other transponder.",
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "transponder_eit": {
+        "type": "object",
+        "properties": {
+          "max_bitrate": {
+            "description": "Maximum bitrate for the transponder's EIT EPG.",
+            "type": "integer",
+            "format": "max_bitrate",
+            "nullable": true
+          },
+          "xmltv_url": {
+            "description": "Directory for storing the XMLTV EPG files.",
+            "type": "string",
+            "nullable": true
+          },
+          "keep_epg": {
+            "description": "Period for storing the XMLTV files.",
+            "type": "integer",
+            "format": "seconds",
+            "nullable": true
+          },
+          "intervals_pf": {
+            "description": "Periods for sending the present/following events.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ts_eit_intervals"
+              }
+            ],
+            "nullable": true
+          },
+          "intervals_schedule": {
+            "description": "Periods for sending the event schedules.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ts_eit_intervals"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "transponder_program": {
+        "type": "object",
+        "properties": {
+          "program_id": {
+            "description": "Identifier of the program within the transponder.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/program_id"
+              }
+            ],
+            "x-primary-key": true
+          },
+          "source": {
+            "description": "The stream that is in use as the program source.",
+            "type": "string",
+            "format": "media_name",
+            "nullable": true
+          },
+          "lcn": {
+            "description": "Logical channel number.",
+            "type": "integer",
+            "nullable": true
+          },
+          "service_type": {
+            "description": "Information about the program type.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ts_service_type"
+              }
+            ],
+            "nullable": true
+          },
+          "vb": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "This property is no longer supported, use individual [`bitrate`](https://flussonic.com/doc/video-playback/udp-multicast-with-constant-bitrate/#settings-bitrates-of-tracks) option for a program PID.",
+            "deprecated": true
+          },
+          "title": {
+            "description": "The program title.",
+            "type": "string",
+            "nullable": true
+          },
+          "pids": {
+            "description": "The list of PIDs.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/output_mpegts_pids"
+              }
+            ],
+            "nullable": true
+          },
+          "eit_title": {
+            "description": "The name of the EIT.",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["program_id"]
+      },
+      "transponder_config": {
+        "properties": {
+          "name": {
+            "description": "The name of the transponder.",
+            "type": "string",
+            "format": "media_name",
+            "x-primary-key": true
+          },
+          "pushes": {
+            "description": "The list of pushes for the transponder.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/transponder_push"
+                }
+              ]
+            },
+            "type": "array",
+            "nullable": true
+          },
+          "bitrate": {
+            "description": "Transponder bitrate.",
+            "type": "integer",
+            "format": "speed",
+            "nullable": true
+          },
+          "provider": {
+            "description": "Provider of the transponder.",
+            "type": "string",
+            "nullable": true
+          },
+          "network_name": {
+            "description": "The name of the TV network.",
+            "type": "string",
+            "nullable": true
+          },
+          "ts_stream_id": {
+            "description": "The identifier of the transport stream for the transponder.",
+            "type": "integer",
+            "nullable": true
+          },
+          "network_id": {
+            "description": "Identifier of the delivery network.",
+            "type": "integer",
+            "nullable": true
+          },
+          "original_network_id": {
+            "description": "Identifier of the original delivery network. The same original network is used for NIT and SDT.",
+            "type": "integer",
+            "nullable": true
+          },
+          "ts_descriptors": {
+            "description": "The list of transport stream descriptors. Descriptors are added to NIT and SDT.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ts_descriptor"
+                }
+              ]
+            },
+            "type": "array",
+            "default": []
+          },
+          "timeouts": {
+            "description": "The list of timeouts for autodetect of provider, title, and service_type of the programs.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ts_timeouts"
+              }
+            ],
+            "nullable": true
+          },
+          "programs": {
+            "description": "The list of programs in the transponder.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/transponder_program"
+                }
+              ]
+            },
+            "type": "array",
+            "nullable": true
+          },
+          "time_offsets": {
+            "description": "The list of time offsets.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/transponder_time_offset"
+                }
+              ]
+            },
+            "type": "array",
+            "default": []
+          },
+          "versions": {
+            "description": "Versions of PSI tables.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ts_versions"
+              }
+            ],
+            "nullable": true
+          },
+          "others": {
+            "description": "The list of other transponders on the network.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/transponder_other"
+                }
+              ]
+            },
+            "type": "array",
+            "default": []
+          },
+          "eit": {
+            "description": "Transponder's program guide in EIT format.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/transponder_eit"
+              }
+            ],
+            "nullable": true
+          },
+          "video_buffer": {
+            "description": "The size of the video buffer for the transponder.",
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "type": "object"
+      },
+      "transponder_other": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the other transponder on the network.",
+            "type": "string",
+            "format": "media_name",
+            "x-primary-key": true
+          }
+        },
+        "required": ["name"]
+      },
+      "peer_config": {
+        "type": "object",
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "format": "server_name",
+            "description": "Globally unique server name.",
+            "x-primary-key": true
+          },
+          "api_url": {
+            "type": "string",
+            "format": "url",
+            "description": "The internal address for internal communication between the server and the peers. \nInternal communications are based on API so this is basically an URL for API calls. This URL does not have to be public.\nThe API URL can include a port number, or the port number can be set by the `admin_http` parameter.\n",
+            "nullable": true
+          },
+          "public_payload_url": {
+            "description": "The public address that is exposed to clients. It can also contain a port number.\nThe client will be redirected to this URL and port when requesting for the stream captured on the peer\neven if other `http` port is set in the peer's own config.\n",
+            "type": "string",
+            "format": "url",
+            "nullable": true
+          },
+          "public": {
+            "description": "The public address that is exposed to clients.",
+            "type": "string",
+            "format": "url",
+            "nullable": true,
+            "deprecated": true,
+            "x-alias": "public_payload_url"
+          },
+          "private_payload_url": {
+            "description": "The internal address for communication in a local network (by default, it is equal to API URL).\n",
+            "type": "string",
+            "format": "url",
+            "nullable": true
+          },
+          "fetch_timeout": {
+            "description": "How often the peer will try to get the data from the remote server via internal API.",
+            "type": "integer",
+            "format": "milliseconds",
+            "nullable": true
+          },
+          "stale_timeout": {
+            "description": "The time after which deleted streams on this server are considered to be inactive \nand cannot be used in the `cluster_ingest` mechanism.\n",
+            "type": "integer",
+            "format": "milliseconds",
+            "nullable": true
+          },
+          "channel_limit": {
+            "description": "Maximal number of streams.",
+            "type": "integer",
+            "nullable": true
+          },
+          "cpu_limit": {
+            "description": "CPU limit in percents.",
+            "type": "integer",
+            "format": "percents",
+            "nullable": true
+          },
+          "cluster_key": {
+            "description": "The key for authorization for inter-Flussonic connections.\nAll cluster peers should have the same cluster key.\n",
+            "type": "string",
+            "nullable": true
+          },
+          "max_bitrate": {
+            "description": "Maximal output bitrate of the peer.",
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "deprecated": true
+          }
+        }
+      },
+      "balancer_config": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "format": "media_name",
+            "description": "Globally unique balancer name.",
+            "x-primary-key": true
+          },
+          "servers": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/balancer_server_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "Balancer will distribute requests between these servers."
+          },
+          "mode": {
+            "description": "Balancing mode",
+            "type": "string",
+            "default": "bitrate",
+            "oneOf": [
+              {
+                "title": "Usage",
+                "const": "usage",
+                "description": "Bandwidth usage"
+              },
+              {
+                "title": "Clients",
+                "const": "clients",
+                "description": "Total clients number"
+              },
+              {
+                "title": "Bitrate",
+                "const": "bitrate",
+                "description": "Total output bitrate"
+              },
+              {
+                "title": "Streams",
+                "const": "streams",
+                "description": "Streams number"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "balancer_server_config": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Hostname of the peer. Can refer to globally defined peer.",
+            "x-primary-key": true
+          },
+          "max_bitrate": {
+            "type": "integer",
+            "format": "speed",
+            "nullable": true,
+            "description": "Maximum allowed bitrate, request is redirecting if current bitrate is lower."
+          },
+          "countries": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "iso3166"
+            },
+            "nullable": true,
+            "description": "Client will be redirected to the peer if its IP belongs to one of these countries."
+          },
+          "countries_default": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "This flag allows to redirect a request to this peer if \"countries\" list not matched."
+          }
+        }
+      },
+      "source_config": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/source_specific_config"
+          },
+          {
+            "$ref": "#/components/schemas/stream_config_media"
+          },
+          {
+            "$ref": "#/components/schemas/stream_config_onpremises"
+          }
+        ]
+      },
+      "source_specific_config": {
+        "type": "object",
+        "properties": {
+          "cluster_key": {
+            "description": "Cluster ingest stream key.",
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "logo_file": {
         "type": "object",
         "properties": {
@@ -4606,6 +6605,14 @@
             "type": "string",
             "description": "The storage (on the disk or on another server) that Flussonic will scan for VOD files.\nIf it is a path on the disk, it should be specified relating to the disk root.\n\nIt is possible to specify multiple storages for one VOD location. When Flussonic gets the URL for playing the file, it finds the prefix in this URL, \ncuts the path after it and consequently searches for this path in all specified storages.\n",
             "example": "/storage"
+          },
+          "extra": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "description": "Some additional options."
           }
         }
       },
@@ -5209,6 +7216,14 @@
             ],
             "nullable": true,
             "description": "Specify logging level for this sink. Anything more verbose than it will not get into this sink.\n"
+          },
+          "extra": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "nullable": true,
+            "description": "Some additional options."
           }
         },
         "required": ["name", "url"]
@@ -6781,9 +8796,79 @@
         },
         "required": ["name"]
       },
+      "cache_config": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "format": "cache_name",
+            "description": "Globally unique cache name.",
+            "externalDocs": {
+              "description": "Find more information here.",
+              "url": "https://flussonic.com/doc/vod-file-broadcasting/cache/"
+            },
+            "x-primary-key": true,
+            "example": "cache1"
+          },
+          "path": {
+            "description": "The path where the files from the cloud or HTTP are cached to speed up broadcasting.",
+            "type": "string",
+            "format": "disk_path",
+            "nullable": true,
+            "example": "/storage/cache"
+          },
+          "misses": {
+            "description": "The number of requests necessary for a file to be cached.",
+            "type": "integer",
+            "nullable": true,
+            "example": 3
+          },
+          "storage_limit": {
+            "description": "Maximum disk consumption in bytes. \nWhen this limit is reached, the oldest files will be overridden by later files.\n",
+            "type": "integer",
+            "format": "bytes",
+            "nullable": true,
+            "example": 400000
+          },
+          "expiration": {
+            "description": "A period (in seconds) back from the current moment during which the files are stored.\nAs time goes, the files which are older than this period are being overridden by the later files.\n",
+            "type": "integer",
+            "format": "seconds",
+            "nullable": true,
+            "example": 604800
+          },
+          "disk_limit": {
+            "description": "Maximum disk consumption in bytes. \nWhen this limit is reached, the oldest files will be overridden by later files.\n",
+            "type": "integer",
+            "format": "bytes",
+            "nullable": true,
+            "deprecated": true,
+            "x-alias": "storage_limit",
+            "x-delete-at": "21.12"
+          },
+          "time_limit": {
+            "description": "A period (in seconds) back from the current moment during which the files are stored.\nAs time goes, the files which are older than this period are being overridden by the later files.\n",
+            "type": "integer",
+            "format": "seconds",
+            "nullable": true,
+            "deprecated": true,
+            "x-alias": "expiration",
+            "x-delete-at": "21.12"
+          }
+        },
+        "required": ["name"]
+      },
+      "dynafile_config": {
+        "type": "object",
+        "properties": {}
+      },
       "network_addr": {
         "type": "string",
         "minLength": 1
+      },
+      "chassis_config": {
+        "type": "object",
+        "properties": {}
       },
       "chassis_version": {
         "type": "string"
@@ -6972,6 +9057,24 @@
         "type": "object",
         "properties": {}
       },
+      "admin_credentials": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "nullable": true,
+            "description": "Login",
+            "example": "secretlogin"
+          },
+          "password": {
+            "type": "string",
+            "nullable": true,
+            "description": "Password",
+            "example": "passw"
+          }
+        },
+        "required": ["login", "password"]
+      },
       "server_config": {
         "allOf": [
           {
@@ -6985,6 +9088,15 @@
       "server_config_base": {
         "type": "object",
         "properties": {
+          "listeners": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/listeners"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of network listeners."
+          },
           "http": {
             "type": "array",
             "items": {
@@ -6995,8 +9107,9 @@
               ]
             },
             "default": [],
-            "description": "List of HTTP ports or `host:port` pairs that will be used for listening.",
-            "example": [80]
+            "description": "List of HTTP ports or `host:port` pairs that will be used for listening. Deprecated, use listeners object.",
+            "example": [80],
+            "deprecated": true
           },
           "https": {
             "type": "array",
@@ -7008,8 +9121,9 @@
               ]
             },
             "default": [],
-            "description": "List of HTTP ports or `host:port` pairs specs provided that you have valid certificate and domain name.",
-            "example": [443]
+            "description": "List of HTTP ports or `host:port` pairs specs provided that you have valid certificate and domain name. Deprecated, use listeners object.",
+            "example": [443],
+            "deprecated": true
           },
           "admin_http": {
             "type": "array",
@@ -7021,8 +9135,9 @@
               ]
             },
             "default": [],
-            "description": "Enable another port for API calls. If enabled, `http` port is **not** used for API calls.",
-            "example": [2080]
+            "description": "Enable another port for API calls. If enabled, `http` port is **not** used for API calls. Deprecated, use listeners object.",
+            "example": [2080],
+            "deprecated": true
           },
           "admin_https": {
             "type": "array",
@@ -7034,8 +9149,9 @@
               ]
             },
             "default": [],
-            "description": "Enable `admin_https` port for API calls.",
-            "example": [2443]
+            "description": "Enable `admin_https` port for API calls. Deprecated, use listeners object.",
+            "example": [2443],
+            "deprecated": true
           },
           "rtsp": {
             "allOf": [
@@ -7177,6 +9293,24 @@
             ],
             "nullable": true
           },
+          "view_auth": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/admin_credentials"
+              }
+            ],
+            "nullable": true,
+            "description": "Credentials for access to readonly API functions like getting streams info, status, and statistics.\n"
+          },
+          "edit_auth": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/admin_credentials"
+              }
+            ],
+            "nullable": true,
+            "description": "Credentials for administrator access to the server."
+          },
           "stats": {
             "allOf": [
               {
@@ -7189,6 +9323,239 @@
         }
       },
       "server_config_full": {
+        "type": "object",
+        "properties": {
+          "chassis": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/chassis_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the chassis."
+          },
+          "event_sinks": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/event_sink_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of event notifications"
+          },
+          "auth_backends": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/auth_backend_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of auth backends"
+          },
+          "vods": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/vod_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of VODs"
+          },
+          "dvrs": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/dvr_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of the DVRs"
+          },
+          "peers": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/peer_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of peers in the cluster."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/source_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of the video sources."
+          },
+          "transponders": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/transponder_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of the transponders."
+          },
+          "templates": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/template_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of the templates."
+          },
+          "streams": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/stream_config"
+                }
+              ]
+            },
+            "default": [],
+            "description": "The configuration of the streams."
+          },
+          "caches": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/cache_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of the cache."
+          },
+          "dvb_cards": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/dvb_card_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of the DVB cards."
+          },
+          "balancers": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/balancer_config"
+                }
+              ]
+            },
+            "nullable": true,
+            "description": "The configuration of the balancers."
+          },
+          "camera_alarm": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/camera_alarm_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the camera alarms."
+          },
+          "rproxy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/rproxy_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the port forwarding."
+          },
+          "vsaas": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/vsaas_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the video surveillance subsystem."
+          },
+          "vision": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/vision_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the AI analytics subsystem."
+          },
+          "dynafile": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/dynafile_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the Dynafile for watermarking."
+          },
+          "file_processor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/file_processor_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the file processor."
+          },
+          "iptv": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/iptv_config"
+              }
+            ],
+            "nullable": true,
+            "description": "The configuration of the IPTV"
+          }
+        }
+      },
+      "rproxy_config": {
+        "type": "object",
+        "properties": {}
+      },
+      "vsaas_config": {
+        "type": "object",
+        "properties": {}
+      },
+      "camera_alarm_config": {
+        "type": "object",
+        "properties": {}
+      },
+      "vision_config": {
         "type": "object",
         "properties": {}
       },
@@ -7274,404 +9641,603 @@
         "type": "object",
         "properties": {
           "cpu_units": {
-            "type": "integer",
-            "nullable": true,
+            "nullable": false,
+            "default": 0,
             "x-metric-type": "gauge",
             "title": "CPU",
-            "description": "The absolute metric to be used for estimating CPU performance and capacity.\nSuppose we have Server A and Server B with different CPUs.\nFor calculating absolute metric we can measure the CPU load on both servers \nkeeping the same set of streams on both servers. \n"
+            "description": "The absolute metric to be used for estimating CPU performance and capacity.\nSuppose we have Server A and Server B with different CPUs.\nFor calculating absolute metric we can measure the CPU load on both servers \nkeeping the same set of streams on both servers.\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "ram_bytes": {
-            "type": "integer",
-            "nullable": true,
+            "nullable": false,
+            "default": 0,
             "format": "bytes",
             "title": "RAM",
-            "description": "Total amount of server RAM in (mega)bytes"
+            "description": "Total amount of server RAM in (mega)bytes",
+            "x-metric-type": "gauge",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "inputs_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "Input Duration",
-            "description": "Total duration of all inputs successfully captured since `opened_at`  (counter)"
+            "description": "Total duration of all inputs successfully captured since `opened_at`  (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "inputs_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "title": "Input Traffic",
             "x-metric-type": "counter",
-            "description": "Total amount of data in all inputs captured since `opened_at`  (counter)"
+            "description": "Total amount of data in all inputs captured since `opened_at`  (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "inputs_bandwidth": {
-            "type": "integer",
-            "format": "bps",
-            "x-metric-type": "gauge",
             "nullable": false,
             "default": 0,
+            "format": "bps",
+            "x-metric-type": "gauge",
             "title": "Input Traffic",
-            "description": "Downstream bandwidth at the time of the request  (gauge)"
+            "description": "Downstream bandwidth at the time of the request  (gauge)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoded_streams": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "x-metric-type": "gauge",
             "title": "Transcoded streams",
-            "description": "The number of streams decoded at the time of the request (gauge).\nA reasonable limit to prevent transcoder overload by large amount of transcoded streams \n"
+            "description": "The number of streams decoded at the time of the request (gauge).\nA reasonable limit to prevent transcoder overload by large amount of transcoded streams\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_total_output_bitrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "Transcoder Output Bitrate (MBR)",
-            "description": "Transcoder's total output bitrate measured at the time of the request (gauge).\n"
+            "description": "Transcoder's total output bitrate measured at the time of the request (gauge).\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_total_pixelrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "gpxps",
             "x-metric-type": "gauge",
             "title": "Transcoder Total Pixelrate",
-            "description": "Transcoder's total output measured in gigapixels per second (gpxps)"
+            "description": "Transcoder's total output measured in gigapixels per second (gpxps)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_sd_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "Transcoded SD duration",
-            "description": "Seconds of total **output** video transcoded with SD or less resolution. \nIf you have 3 SD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n"
+            "description": "Seconds of total **output** video transcoded with SD or less resolution. \nIf you have 3 SD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_sd_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "x-metric-type": "counter",
             "title": "Transcoded SD bytes",
-            "description": "Bytes of total **output** video transcoded with SD or less resolution. \nIf you have 3 SD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n"
+            "description": "Bytes of total **output** video transcoded with SD or less resolution. \nIf you have 3 SD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_sd_bitrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "Transcoded SD bitrate",
-            "description": "Transcoder's SD profile output measured in bits per seconds at the time of the request.\nIf you have 3 SD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n"
+            "description": "Transcoder's SD profile output measured in bits per seconds at the time of the request.\nIf you have 3 SD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_sd_pixels": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "x-metric-type": "counter",
             "title": "Transcoded SD pixels",
-            "description": "Total amount of transcoded pixels in SD profile. Specified in billions."
+            "description": "Total amount of transcoded pixels in SD profile. Specified in billions.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_sd_pixelrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "gpxps",
             "x-metric-type": "gauge",
             "title": "Transcoded SD pixelrate",
-            "description": "Transcoder's SD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 SD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n"
+            "description": "Transcoder's SD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 SD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_hd_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "Transcoded HD duration",
-            "description": "Seconds of total **output** video transcoded with HD or less resolution. \nIf you have 3 HD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n"
+            "description": "Seconds of total **output** video transcoded with HD or less resolution. \nIf you have 3 HD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_hd_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "x-metric-type": "counter",
             "title": "Transcoded HD bytes",
-            "description": "Bytes of total **output** video transcoded with HD or less resolution. \nIf you have 3 HD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n"
+            "description": "Bytes of total **output** video transcoded with HD or less resolution. \nIf you have 3 HD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_hd_bitrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "Transcoded HD bitrate",
-            "description": "Transcoder's HD profile output measured in bits per seconds at the time of the request.\nIf you have 3 HD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n"
+            "description": "Transcoder's HD profile output measured in bits per seconds at the time of the request.\nIf you have 3 HD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_hd_pixels": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "x-metric-type": "counter",
             "title": "Transcoded HD pixels",
-            "description": "Total amount of transcoded pixels. Specified in billions. (counter)"
+            "description": "Total amount of transcoded pixels. Specified in billions. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_hd_pixelrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "gpxps",
             "x-metric-type": "gauge",
             "title": "Transcoded HD pixelrate",
-            "description": "Transcoder's HD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 HD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n"
+            "description": "Transcoder's HD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 HD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_fhd_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "Transcoded FullHD duration",
-            "description": "Seconds of total **output** video transcoded with FullHD or less resolution. \nIf you have 3 FullHD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n"
+            "description": "Seconds of total **output** video transcoded with FullHD or less resolution. \nIf you have 3 FullHD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_fhd_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "x-metric-type": "counter",
             "title": "Transcoded FullHD bytes",
-            "description": "Bytes of total **output** video transcoded with FullD or less resolution. \nIf you have 3 FullHD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n"
+            "description": "Bytes of total **output** video transcoded with FullD or less resolution. \nIf you have 3 FullHD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_fhd_bitrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "Transcoded FullHD bitrate",
-            "description": "Transcoder's FullHD profile output measured in bits per seconds at the time of the request.\nIf you have 3 FullHD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n"
+            "description": "Transcoder's FullHD profile output measured in bits per seconds at the time of the request.\nIf you have 3 FullHD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_fhd_pixels": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "x-metric-type": "counter",
             "title": "Transcoded FullHD pixels",
-            "description": "Total amount of transcoded pixels. Specified in billions. (counter)"
+            "description": "Total amount of transcoded pixels. Specified in billions. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_fhd_pixelrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "gpxps",
             "x-metric-type": "gauge",
             "title": "Transcoded FullHD pixelrate",
-            "description": "Transcoder's FullHD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 FullHD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n"
+            "description": "Transcoder's FullHD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 FullHD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_uhd_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "Transcoded UltraHD duration",
-            "description": "Seconds of total **output** video transcoded with UltraHD or less resolution. \nIf you have 3 UltraHD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n"
+            "description": "Seconds of total **output** video transcoded with UltraHD or less resolution. \nIf you have 3 UltraHD profiles running during 100 seconds, this parameter will be 300 seconds. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_uhd_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "x-metric-type": "counter",
             "title": "Transcoded UltraHD bytes",
-            "description": "Bytes of total **output** video transcoded with UltraHD or less resolution. \nIf you have 3 UltraHD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n"
+            "description": "Bytes of total **output** video transcoded with UltraHD or less resolution. \nIf you have 3 UltraHD profiles transcoded into 100 bytes each, this parameter will be 300 bytes. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_uhd_bitrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "Transcoded UltraHD bitrate",
-            "description": "Transcoder's UltraHD profile output measured in bits per seconds at the time of the request.\nIf you have 3 UltraHD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n"
+            "description": "Transcoder's UltraHD profile output measured in bits per seconds at the time of the request.\nIf you have 3 UltraHD profiles with 1000 bps each, this parameter will be 3000 bps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_uhd_pixels": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "x-metric-type": "counter",
             "title": "Transcoded UltraHD pixels",
-            "description": "Total amount of transcoded pixels. Specified in billions.  (counter)"
+            "description": "Total amount of transcoded pixels. Specified in billions.  (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "transcoder_uhd_pixelrate": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "gpxps",
             "x-metric-type": "gauge",
             "title": "Transcoded UltraHD pixelrate",
-            "description": "Transcoder's UltraHD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 UltraHD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n"
+            "description": "Transcoder's UltraHD profile output measured in (giga)pixels per second at the time of the request (gauge).\nIf you have 3 UltraHD profiles with 1000 gpxps each, this parameter will be 3000 gpxps. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_storage_io_read": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "DVR io Read",
-            "description": "Total bandwidth of all read requests to DVR storage in bytes per second. (gauge)\n"
+            "description": "Total bandwidth of all read requests to DVR storage in bytes per second. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_storage_io_write": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "DVR io Write",
-            "description": "Total bandwidth of all write requests to DVR storage in bytes per second. (gauge)\n"
+            "description": "Total bandwidth of all write requests to DVR storage in bytes per second. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_storage_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "gauge",
             "title": "DVR Stored Duration",
-            "description": "The duration of all segments kept on storage at the time of the request \nno matter how many tracks a segment contains. (gauge)\n"
+            "description": "The duration of all segments kept on storage at the time of the request \nno matter how many tracks a segment contains. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_storage_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "title": "DVR Stored Bytes",
-            "description": "Total bytes of all segments kept on storage at the time of the request. (gauge)\n"
+            "description": "Total bytes of all segments kept on storage at the time of the request. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_recorded_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "DVR Recorded Duration",
-            "description": "Total duration of segments recorded into DVR since `opened_at` no matter how many tracks a segment contains (counter).\n"
+            "description": "Total duration of segments recorded into DVR since `opened_at` no matter how many tracks a segment contains (counter).\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_recorded_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "title": "DVR Recorded Bytes",
             "x-metric-type": "counter",
-            "description": "Total amount of data in segments recorded into DVR since `opened_at`. (counter)"
+            "description": "Total amount of data in segments recorded into DVR since `opened_at`. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_played_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "DVR Playback Duration",
-            "description": "Total duration of segments played from DVR since `opened_at` \nno matter how many tracks a played segment contains (counter)\n"
+            "description": "Total duration of segments played from DVR since `opened_at` \nno matter how many tracks a played segment contains (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "dvr_played_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "x-metric-type": "counter",
             "title": "DVR Playback Traffic",
-            "description": "Total amount of data in segments played from DVR since `opened_at` \nno matter how many tracks a played segment contains. (counter)\n"
+            "description": "Total amount of data in segments played from DVR since `opened_at` \nno matter how many tracks a played segment contains. (counter)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "output_bandwidth": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bps",
             "x-metric-type": "gauge",
             "title": "Output Bandwidth",
-            "description": "Upstream bandwidth on the time of the request. (gauge)"
+            "description": "Upstream bandwidth on the time of the request. (gauge)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "playback_total_sessions": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "x-metric-type": "counter",
             "title": "Playback Sessions",
-            "description": "The number of sessions played since `opened_at`. (counter)"
+            "description": "The number of sessions played since `opened_at`. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "playback_opened_sessions": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "x-metric-type": "gauge",
             "title": "Playback Simultaneously Opened Sessions",
-            "description": "The number of open sessions at the moment of the request. (gauge)"
+            "description": "The number of open sessions at the moment of the request. (gauge)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "playback_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "Playback Duration",
-            "description": "The number of seconds that viewers have watched since `opened_at`. (counter)"
+            "description": "The number of seconds that viewers have watched since `opened_at`. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "playback_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "title": "Playback Traffic",
             "x-metric-type": "counter",
-            "description": "The number of bytes downloaded by viewers since `opened_at`. (counter)"
+            "description": "The number of bytes downloaded by viewers since `opened_at`. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "push_duration": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "seconds",
             "x-metric-type": "counter",
             "title": "Push Duration",
-            "description": "The number of seconds pushed since `opened_at`. (counter)"
+            "description": "The number of seconds pushed since `opened_at`. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "push_bytes": {
-            "type": "integer",
             "nullable": false,
             "default": 0,
             "format": "bytes",
             "title": "Push Traffic",
             "x-metric-type": "counter",
-            "description": "The number of bytes pushed since `opened_at`. (counter)"
+            "description": "The number of bytes pushed since `opened_at`. (counter)",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "vision_units": {
-            "type": "integer",
-            "nullable": true,
+            "nullable": false,
+            "default": 0,
             "x-metric-type": "gauge",
             "title": "Computer Vision",
-            "description": "Empirically picked metric and cap for estimated video analytics utilization.\n\nLet's say Nvidia 1080 is able to process 10 streams with face detection,\nso one 1080 GPU has 10 virtual units and one stream utilizes 1 unit. (gauge)\n"
+            "description": "Empirically picked metric and cap for estimated video analytics utilization.\n\nLet's say Nvidia 1080 is able to process 10 streams with face detection,\nso one 1080 GPU has 10 virtual units and one stream utilizes 1 unit. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "vision_gpu_ram_bytes": {
-            "type": "integer",
-            "nullable": true,
+            "nullable": false,
+            "default": 0,
             "format": "bytes",
             "x-metric-type": "gauge",
             "title": "Computer Vision GPU RAM",
-            "description": "GPU RAM size in bytes (gauge)\n"
+            "description": "GPU RAM size in bytes (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           },
           "vision_pixelrate": {
-            "type": "integer",
-            "nullable": true,
+            "nullable": false,
+            "default": 0,
             "format": "mpps",
             "x-metric-type": "gauge",
             "title": "Computer Vision Pixelrate",
-            "description": "Vision module throughput measured in (mega)pixels per second at the moment of the request. (gauge)\n"
+            "description": "Vision module throughput measured in (mega)pixels per second at the moment of the request. (gauge)\n",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/cloud_resource_usage"
+              }
+            ]
           }
         }
+      },
+      "cloud_resource_usage": {
+        "type": "integer",
+        "description": "Count of consumed resource",
+        "example": 100
+      },
+      "tls_version": {
+        "type": "string",
+        "enum": ["tlsv1", "tlsv1.1", "tlsv1.2"]
       },
       "streams_list": {
         "allOf": [
@@ -7804,7 +10370,7 @@
           }
         ]
       },
-      "events_list": {
+      "available_events_list": {
         "allOf": [
           {
             "$ref": "#/components/schemas/collection_response"
@@ -7929,6 +10495,26 @@
             }
           }
         ]
+      },
+      "file_processor_config": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "description": "The directory where Flussonic puts output files.",
+            "type": "string",
+            "format": "disk_path",
+            "deprecated": true,
+            "nullable": true
+          },
+          "out": {
+            "description": "The directory where Flussonic puts output files.",
+            "type": "string",
+            "format": "disk_path",
+            "deprecated": true,
+            "nullable": true,
+            "x-alias": "path"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -8765,7 +11351,7 @@
     },
     "/event_sinks/{name}/events": {
       "get": {
-        "operationId": "events_list",
+        "operationId": "available_events_list",
         "summary": "Get events from sink configuration",
         "description": "This method allows to get the batch of events from an event sink configuration.\nCurrenly this method is not implemented yet.\nHowever, its schema can be used for getting the list of events with descriptions (see the `event` parameter in the response.)\n",
         "parameters": [
@@ -8787,7 +11373,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/events_list"
+                  "$ref": "#/components/schemas/available_events_list"
                 }
               }
             }

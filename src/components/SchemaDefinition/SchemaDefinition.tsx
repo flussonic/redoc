@@ -14,6 +14,7 @@ export interface ObjectDescriptionProps {
   exampleRef?: string;
   showReadOnly?: boolean;
   showWriteOnly?: boolean;
+  showExample?: boolean;
   parser: OpenAPIParser;
   options: RedocNormalizedOptions;
   operationHash?: string;
@@ -54,7 +55,12 @@ export class SchemaDefinition extends React.PureComponent<ObjectDescriptionProps
   }
 
   render() {
-    const { showReadOnly = true, showWriteOnly = false, operationHash } = this.props;
+    const {
+      showReadOnly = true,
+      showWriteOnly = false,
+      operationHash,
+      showExample = true,
+    } = this.props;
     return (
       <Section>
         <Row>
@@ -66,11 +72,16 @@ export class SchemaDefinition extends React.PureComponent<ObjectDescriptionProps
               operationHash={operationHash}
             />
           </MiddlePanel>
-          <DarkRightPanel>
-            <MediaSamplesWrap>
-              <MediaTypeSamples renderDropdown={this.renderDropdown} mediaType={this.mediaModel} />
-            </MediaSamplesWrap>
-          </DarkRightPanel>
+          {showExample && (
+            <DarkRightPanel>
+              <MediaSamplesWrap>
+                <MediaTypeSamples
+                  renderDropdown={this.renderDropdown}
+                  mediaType={this.mediaModel}
+                />
+              </MediaSamplesWrap>
+            </DarkRightPanel>
+          )}
         </Row>
       </Section>
     );

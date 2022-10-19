@@ -1,15 +1,15 @@
 {
   "name": "@web/redoc-cli",
-  "version": "0.13.21",
+  "version": "0.13.24",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
       "name": "@web/redoc-cli",
-      "version": "0.13.21",
+      "version": "0.13.24",
       "license": "MIT",
       "dependencies": {
-        "@web/redoc": "1.0.3",
+        "@web/redoc": "1.0.6",
         "chokidar": "^3.5.1",
         "handlebars": "^4.7.7",
         "isarray": "^2.0.5",
@@ -26,8 +26,6 @@
         "redoc-cli": "index.js"
       },
       "devDependencies": {
-        "@types/chokidar": "^2.1.3",
-        "@types/handlebars": "^4.1.0",
         "@types/mkdirp": "^1.0.1"
       },
       "engines": {
@@ -260,16 +258,6 @@
         "node": ">=6"
       }
     },
-    "node_modules/@types/chokidar": {
-      "version": "2.1.3",
-      "resolved": "https://registry.npmjs.org/@types/chokidar/-/chokidar-2.1.3.tgz",
-      "integrity": "sha512-6qK3xoLLAhQVTucQGHTySwOVA1crHRXnJeLwqK6KIFkkKa2aoMFXh+WEi8PotxDtvN6MQJLyYN9ag9P6NLV81w==",
-      "deprecated": "This is a stub types definition. chokidar provides its own type definitions, so you do not need this installed.",
-      "dev": true,
-      "dependencies": {
-        "chokidar": "*"
-      }
-    },
     "node_modules/@types/eslint": {
       "version": "8.4.1",
       "resolved": "https://registry.npmjs.org/@types/eslint/-/eslint-8.4.1.tgz",
@@ -296,16 +284,6 @@
       "integrity": "sha512-C6N5s2ZFtuZRj54k2/zyRhNDjJwwcViAM3Nbm8zjBpbqAdZ00mr0CFxvSKeO8Y/e03WVFLpQMdHYVfUd6SB+Hw==",
       "peer": true
     },
-    "node_modules/@types/handlebars": {
-      "version": "4.1.0",
-      "resolved": "https://registry.npmjs.org/@types/handlebars/-/handlebars-4.1.0.tgz",
-      "integrity": "sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==",
-      "deprecated": "This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.",
-      "dev": true,
-      "dependencies": {
-        "handlebars": "*"
-      }
-    },
     "node_modules/@types/json-schema": {
       "version": "7.0.9",
       "resolved": "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.9.tgz",
@@ -326,9 +304,9 @@
       "integrity": "sha512-zjQ69G564OCIWIOHSXyQEEDpdpGl+G348RAKY0XXy9Z5kU9Vzv1GMNnkar/ZJ8dzXB3COzD9Mo9NtRZ4xfgUww=="
     },
     "node_modules/@web/redoc": {
-      "version": "1.0.3",
-      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.3.tgz",
-      "integrity": "sha1-6o/fR9UQGD685B1HhraKxfo8Io4=",
+      "version": "1.0.6",
+      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.6.tgz",
+      "integrity": "sha1-mTgrGY7x7UuK6X6waADxHDG1HHg=",
       "dependencies": {
         "@redocly/openapi-core": "^1.0.0-beta.104",
         "classnames": "^2.3.1",
@@ -4002,15 +3980,6 @@
         "defer-to-connect": "^1.0.1"
       }
     },
-    "@types/chokidar": {
-      "version": "2.1.3",
-      "resolved": "https://registry.npmjs.org/@types/chokidar/-/chokidar-2.1.3.tgz",
-      "integrity": "sha512-6qK3xoLLAhQVTucQGHTySwOVA1crHRXnJeLwqK6KIFkkKa2aoMFXh+WEi8PotxDtvN6MQJLyYN9ag9P6NLV81w==",
-      "dev": true,
-      "requires": {
-        "chokidar": "*"
-      }
-    },
     "@types/eslint": {
       "version": "8.4.1",
       "resolved": "https://registry.npmjs.org/@types/eslint/-/eslint-8.4.1.tgz",
@@ -4037,15 +4006,6 @@
       "integrity": "sha512-C6N5s2ZFtuZRj54k2/zyRhNDjJwwcViAM3Nbm8zjBpbqAdZ00mr0CFxvSKeO8Y/e03WVFLpQMdHYVfUd6SB+Hw==",
       "peer": true
     },
-    "@types/handlebars": {
-      "version": "4.1.0",
-      "resolved": "https://registry.npmjs.org/@types/handlebars/-/handlebars-4.1.0.tgz",
-      "integrity": "sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==",
-      "dev": true,
-      "requires": {
-        "handlebars": "*"
-      }
-    },
     "@types/json-schema": {
       "version": "7.0.9",
       "resolved": "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.9.tgz",
@@ -4066,9 +4026,9 @@
       "integrity": "sha512-zjQ69G564OCIWIOHSXyQEEDpdpGl+G348RAKY0XXy9Z5kU9Vzv1GMNnkar/ZJ8dzXB3COzD9Mo9NtRZ4xfgUww=="
     },
     "@web/redoc": {
-      "version": "1.0.3",
-      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.3.tgz",
-      "integrity": "sha1-6o/fR9UQGD685B1HhraKxfo8Io4=",
+      "version": "1.0.6",
+      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.6.tgz",
+      "integrity": "sha1-mTgrGY7x7UuK6X6waADxHDG1HHg=",
       "requires": {
         "@redocly/openapi-core": "^1.0.0-beta.104",
         "classnames": "^2.3.1",

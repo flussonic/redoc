@@ -595,5 +595,136 @@ describe('Models', () => {
                 Tag -> <object> !circular
       `);
     });
+
+    test('should not use discriminator for direct schemas refs in oneOf/anyOf', () => {
+      const spec = parseYaml(outdent`
+      openapi: 3.0.0
+      components:
+        schemas:
+          Parent:
+            type: object
+            discriminator:
+              propertyName: type
+              mapping:
+                foo: '#/components/schemas/Foo'
+                bar: '#/components/schemas/Bar'
+                baz: '#/components/schemas/Baz'
+            properties:
+              type:
+                type: string
+          Foo:
+            allOf:
+              - $ref: '#/components/schemas/Parent'
+              - type: object
+          Bar:
+            allOf:
+            - $ref: '#/components/schemas/Parent'
+            - type: object
+          Baz:
+            allOf:
+            - $ref: '#/components/schemas/Parent'
+            - type: object
+              properties:
+                nested:
+                  anyOf:
+                    - $ref: '#/components/schemas/Foo'
+                    - $ref: '#/components/schemas/Bar'
+
+      `) as any;
+
+      parser = new OpenAPIParser(spec, undefined, opts);
+      const schema = new SchemaModel(
+        parser,
+        spec.components.schemas.Parent,
+        '#/components/schemas/Parent',
+        opts,
+      );
+
+      expect(printSchema(schema, circularDetailsPrinter)).toMatchInlineSnapshot(`
+        oneOf
+          foo ->
+            type: <string>
+          bar ->
+            type: <string>
+          baz ->
+            type: <string>
+            nested: oneOf
+                Foo ->
+                  type: <string>
+                Bar ->
+                  type: <string>
+        `);
+    });
+
+    test('should detect and recursion with nested oneOf case same schema', () => {
+      const spec = parseYaml(outdent`
+      openapi: 3.0.0
+      components:
+        schemas:
+          Test:
+            allOf:
+              - type: object
+                required:
+                  - "@relations"
+                properties:
+                  "@relations":
+                    type: object
+                    properties:
+                      A:
+                        $ref: "#/components/schemas/A"
+              - type: object
+                required:
+                  - "@relations"
+                properties:
+                  "@relations":
+                    type: object
+                    properties:
+                      A:
+                        $ref: "#/components/schemas/A"
+          A:
+            type: object
+            description: Description
+            properties:
+              B:
+                type: array
+                items:
+                  oneOf:
+                    - type: object
+                    - title: tableLookup
+                      type: object
+                      properties:
+                        fallback:
+                          type: array
+                          default: []
+                          items:
+                            $ref: "#/components/schemas/A/properties/B"
+      `) as any;
+
+      parser = new OpenAPIParser(spec, undefined, opts);
+      const schema = new SchemaModel(
+        parser,
+        spec.components.schemas.Test,
+        '#/components/schemas/Test',
+        opts,
+      );
+
+      expect(printSchema(schema, circularDetailsPrinter)).toMatchInlineSnapshot(`
+        @relations*:
+          A:
+            B: [
+              oneOf
+                object -> <object>
+                tableLookup ->
+                  fallback: [
+                    [
+                    oneOf
+                      object -> <object>
+                      tableLookup ->
+                        fallback: [<array> !circular]
+                    ]
+                  ]
+            ]
+        `);
+    });
   });
 });

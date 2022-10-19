@@ -1,15 +1,15 @@
 <div align="center">
-  <img alt="Redoc logo" src="https://raw.githubusercontent.com/Redocly/redoc/master//docs/images/redoc.png" width="400px" />
+  <img alt="Redoc logo" src="https://raw.githubusercontent.com/Redocly/redoc/main//docs/images/redoc.png" width="400px" />
 
   # Generate interactive API documentation from OpenAPI definitions
 
-  [![Build Status](https://travis-ci.com/Redocly/redoc.svg?branch=master)](https://travis-ci.com/Redocly/redoc) [![Coverage Status](https://coveralls.io/repos/Redocly/redoc/badge.svg?branch=master&service=github)](https://coveralls.io/github/Redocly/redoc?branch=master) [![npm](http://img.shields.io/npm/v/redoc.svg)](https://www.npmjs.com/package/redoc) [![License](https://img.shields.io/npm/l/redoc.svg)](https://github.com/Redocly/redoc/blob/master/LICENSE)
+  [![Coverage Status](https://coveralls.io/repos/Redocly/redoc/badge.svg?branch=main&service=github)](https://coveralls.io/github/Redocly/redoc?branch=main) [![npm](http://img.shields.io/npm/v/redoc.svg)](https://www.npmjs.com/package/redoc) [![License](https://img.shields.io/npm/l/redoc.svg)](https://github.com/Redocly/redoc/blob/main/LICENSE)
 
   [![bundle size](http://img.badgesize.io/https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js?compression=gzip&max=300000)](https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js) [![npm](https://img.shields.io/npm/dm/redoc.svg)](https://www.npmjs.com/package/redoc) [![](https://data.jsdelivr.com/v1/package/npm/redoc/badge)](https://www.jsdelivr.com/package/npm/redoc) [![Docker Build Status](https://img.shields.io/docker/build/redocly/redoc.svg)](https://hub.docker.com/r/redocly/redoc/)
 </div>
 
 **This is the README for the `2.x` version of Redoc (React-based).**
-**The README for the `1.x` version is on the [v1.x](https://github.com/Redocly/redoc/tree/v1.x) branch**
+**The README for the `1.x` version is on the [v1.x](https://github.com/Redocly/redoc/tree/v1.x) branch.**
 
 ## About Redoc
 
@@ -21,7 +21,7 @@ By default Redoc offers a three-panel, responsive layout:
 - The central panel contains the documentation.
 - The right panel contains request and response examples.
 
-![Redoc demo](https://raw.githubusercontent.com/Redocly/redoc/master/demo/redoc-demo.png)
+![Redoc demo](https://raw.githubusercontent.com/Redocly/redoc/main/demo/redoc-demo.png)
 
 ## Live demo
 
@@ -72,16 +72,16 @@ Checkout the following feature comparison of Redocly's premium products versus R
 
 Refer to the Redocly's documentation for more information on these products:
 
-- [Portals](https://redoc.ly/docs/developer-portal/introduction/)
-- [Reference](https://redoc.ly/docs/api-reference-docs/getting-started/)
-- [Redoc](https://redoc.ly/docs/redoc/quickstart/intro/)
+- [Portals](https://redocly.com/docs/developer-portal/introduction/)
+- [Reference](https://redocly.com/docs/api-reference-docs/getting-started/)
+- [Redoc](https://redocly.com/docs/redoc/quickstart/intro/)
 
 ## Features
 - Responsive three-panel design with menu/scrolling synchronization
-- [Multiple deployment options](https://redoc.ly/docs/redoc/quickstart/intro/)
-- [Server-side rendering (SSR) ready](https://redoc.ly/docs/redoc/quickstart/cli/#redoc-cli-commands)
+- [Multiple deployment options](https://redocly.com/docs/redoc/quickstart/intro/)
+- [Server-side rendering (SSR) ready](https://redocly.com/docs/redoc/quickstart/cli/#redoc-cli-commands)
 - Ability to integrate your API introduction into the side menu
-- [Simple integration with `create-react-app`](https://redoc.ly/docs/redoc/quickstart/react/)
+- [Simple integration with `create-react-app`](https://redocly.com/docs/redoc/quickstart/react/)
 
   [Example repo](https://github.com/APIs-guru/create-react-app-redoc)
 - [Command-line interface to bundle your docs into a **zero-dependency** HTML file](https://redoc.ly/docs/redoc/quickstart/cli/)
@@ -89,9 +89,9 @@ Refer to the Redocly's documentation for more information on these products:
   ![](docs/images/nested-demo.gif)
 
 ## Customization options
-[<img alt="Customization services" src="http://i.imgur.com/c4sUF7M.png" height="60px">](https://redoc.ly/#services)
-- High-level grouping in side-menu with the [`x-tagGroups`](https://redoc.ly/docs/api-reference-docs/specification-extensions/x-tag-groups/) specification extension
-- Branding/customizations using the [`theme` option](https://redoc.ly/docs/api-reference-docs/configuration/theming/)
+[<img alt="Customization services" src="http://i.imgur.com/c4sUF7M.png" height="60px">](https://redocly.com/#services)
+- High-level grouping in side-menu with the [`x-tagGroups`](https://redocly.com/docs/api-reference-docs/specification-extensions/x-tag-groups/) specification extension
+- Branding/customizations using the [`theme` option](https://redocly.com/docs/api-reference-docs/configuration/theming/)
 
 ## Support
 - OpenAPI v3.0 support
@@ -103,7 +103,7 @@ Refer to the Redocly's documentation for more information on these products:
 
 ## Releases
 **Important:** all the 2.x releases are deployed to npm and can be used with Redocly-cdn:
-- particular release, for example, `v2.0.0-rc.70`: https://cdn.redoc.ly/redoc/v2.0.0-rc.70/bundles/redoc.standalone.js
+- particular release, for example, `v2.0.0`: https://cdn.redoc.ly/redoc/v2.0.0/bundles/redoc.standalone.js
 - `latest` release: https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js
 
 Additionally, all the 1.x releases are hosted on our GitHub Pages-based CDN **(deprecated)**:
@@ -240,10 +240,10 @@ You can use all of the following options with the standalone version of the <red
   * **number**: A fixed number of pixels to be used as offset.
   * **selector**: selector of the element to be used for specifying the offset. The distance from the top of the page to the element's bottom will be used as offset.
   * **function**: A getter function. Must return a number representing the offset (in pixels).
-* `showExtensions` - show vendor extensions ("x-" fields). Extensions used by ReDoc are ignored. Can be boolean or an array of `string` with names of extensions to display.
+* `showExtensions` - show vendor extensions ("x-" fields). Extensions used by Redoc are ignored. Can be boolean or an array of `string` with names of extensions to display.
 * `sortPropsAlphabetically` - sort properties alphabetically.
 * `payloadSampleIdx` - if set, payload sample will be inserted at this index or last. Indexes start from 0.
-* `theme` - ReDoc theme. For details check [theme docs](#redoc-theme-object).
+* `theme` - Redoc theme. For details check [theme docs](#redoc-theme-object).
 * `untrustedSpec` - if set, the spec is considered untrusted and all HTML/markdown is sanitized to prevent XSS. **Disabled by default** for performance reasons. **Enable this option if you work with untrusted user data!**
 * `nonce` - if set, the provided value will be injected in every injected HTML element in the `nonce` attribute. Useful when using CSP, see https://webpack.js.org/guides/csp/.
 * `sideNavStyle` - can be specified in various ways:

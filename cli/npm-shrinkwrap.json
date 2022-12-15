@@ -1,15 +1,15 @@
 {
   "name": "@web/redoc-cli",
-  "version": "0.13.24",
+  "version": "0.13.29",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
       "name": "@web/redoc-cli",
-      "version": "0.13.24",
+      "version": "0.13.29",
       "license": "MIT",
       "dependencies": {
-        "@web/redoc": "1.0.6",
+        "@web/redoc": "1.0.9",
         "chokidar": "^3.5.1",
         "handlebars": "^4.7.7",
         "isarray": "^2.0.5",
@@ -304,9 +304,9 @@
       "integrity": "sha512-zjQ69G564OCIWIOHSXyQEEDpdpGl+G348RAKY0XXy9Z5kU9Vzv1GMNnkar/ZJ8dzXB3COzD9Mo9NtRZ4xfgUww=="
     },
     "node_modules/@web/redoc": {
-      "version": "1.0.6",
-      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.6.tgz",
-      "integrity": "sha1-mTgrGY7x7UuK6X6waADxHDG1HHg=",
+      "version": "1.0.9",
+      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.9.tgz",
+      "integrity": "sha1-h1KAgH8Bv7LAIewgMqz9HPPPmc0=",
       "dependencies": {
         "@redocly/openapi-core": "^1.0.0-beta.104",
         "classnames": "^2.3.1",
@@ -4026,9 +4026,9 @@
       "integrity": "sha512-zjQ69G564OCIWIOHSXyQEEDpdpGl+G348RAKY0XXy9Z5kU9Vzv1GMNnkar/ZJ8dzXB3COzD9Mo9NtRZ4xfgUww=="
     },
     "@web/redoc": {
-      "version": "1.0.6",
-      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.6.tgz",
-      "integrity": "sha1-mTgrGY7x7UuK6X6waADxHDG1HHg=",
+      "version": "1.0.9",
+      "resolved": "https://git.erlyvideo.ru/api/v4/projects/311/packages/npm/@web/redoc/-/@web/redoc-1.0.9.tgz",
+      "integrity": "sha1-h1KAgH8Bv7LAIewgMqz9HPPPmc0=",
       "requires": {
         "@redocly/openapi-core": "^1.0.0-beta.104",
         "classnames": "^2.3.1",

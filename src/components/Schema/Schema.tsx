@@ -106,11 +106,11 @@ export class Schema extends React.Component<Partial<SchemaProps>, { discriminato
     if (oneOf !== undefined) {
       return (
         <OneOfSchema
-          discriminatorValue={this.state.discriminator}
-          onChangeDiscriminator={this.setDiscriminator.bind(this)}
-          schema={schema}
           {...rest}
+          schema={schema}
+          discriminatorValue={this.state.discriminator}
           operationHash={operationHashWithDiscriminator}
+          onChangeDiscriminator={this.setDiscriminator.bind(this)}
         />
       );
     }

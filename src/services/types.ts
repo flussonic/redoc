@@ -29,6 +29,8 @@ export interface LabelsConfig {
   enumArray: string;
   default: string;
   deprecated: string;
+  private: string;
+  deleteAt: string;
   example: string;
   examples: string;
   recursive: string;

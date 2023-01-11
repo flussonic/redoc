@@ -29,7 +29,16 @@ export const FieldDetailsComponent = observer((props: FieldProps) => {
   const { enumSkipQuotes, hideSchemaTitles } = React.useContext(OptionsContext);
 
   const { showExamples, field, renderDiscriminatorSwitch } = props;
-  const { schema, description, deprecated, extensions, in: _in, const: _const } = field;
+  const {
+    schema,
+    description,
+    deprecated,
+    extensions,
+    in: _in,
+    const: _const,
+    deleteAt,
+    isPrivate,
+  } = field;
   const isArrayType = schema.type === 'array';
 
   const rawDefault = enumSkipQuotes || _in === 'header'; // having quotes around header field default values is confusing and inappropriate
@@ -87,9 +96,16 @@ export const FieldDetailsComponent = observer((props: FieldProps) => {
         {schema.isCircular && <RecursiveLabel> {l('recursive')} </RecursiveLabel>}
         {isArrayType && schema.items && <ArrayItemDetails schema={schema.items} />}
       </div>
-      {deprecated && (
+      {(deprecated || isPrivate || deleteAt) && (
         <div>
-          <Badge type="warning"> {l('deprecated')} </Badge>
+          {deprecated && <Badge type="warning"> {l('deprecated')} </Badge>}
+          {deleteAt && (
+            <Badge type="error">
+              {' '}
+              {l('deleteAt')}: {deleteAt}{' '}
+            </Badge>
+          )}
+          {isPrivate && <Badge type="error"> {l('private')} </Badge>}
         </div>
       )}
       <FieldDetail raw={rawDefault} label={l('default') + ':'} value={schema.default} />

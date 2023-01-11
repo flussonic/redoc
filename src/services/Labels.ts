@@ -6,6 +6,8 @@ const labels: LabelsConfig = {
   enumArray: 'Items',
   default: 'Default',
   deprecated: 'Deprecated',
+  private: 'Private',
+  deleteAt: 'Delete at',
   example: 'Example',
   examples: 'Examples',
   recursive: 'Recursive',

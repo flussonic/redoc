@@ -50,6 +50,8 @@ export class FieldModel {
   example?: string;
   examples?: Record<string, ExampleModel> | any[];
   deprecated: boolean;
+  deleteAt: string;
+  isPrivate: boolean;
   in?: OpenAPIParameterLocation;
   kind: string;
   extensions?: Record<string, any>;
@@ -111,6 +113,8 @@ export class FieldModel {
     }
 
     this.deprecated = info.deprecated === undefined ? !!this.schema.deprecated : info.deprecated;
+    this.deleteAt = this.schema.rawSchema['x-delete-at'];
+    this.isPrivate = !!this.schema.rawSchema['x-private'];
 
     if (options.showExtensions) {
       this.extensions = extractExtensions(info, options.showExtensions);

@@ -72,6 +72,7 @@ export class OperationModel implements IMenuItem {
   operationHash?: string;
   httpVerb: string;
   deprecated: boolean;
+  isPrivate: boolean;
   path: string;
   servers: OpenAPIServer[];
   security: SecurityRequirementModel[];
@@ -95,7 +96,7 @@ export class OperationModel implements IMenuItem {
     this.parent = parent;
     this.externalDocs = operationSpec.externalDocs;
 
-    this.deprecated = !!operationSpec.deprecated;
+    this.isPrivate = !!operationSpec['x-private'];
     this.httpVerb = operationSpec.httpVerb;
     this.deprecated = !!operationSpec.deprecated;
     this.operationId = operationSpec.operationId;

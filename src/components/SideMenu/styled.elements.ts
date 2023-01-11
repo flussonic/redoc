@@ -1,7 +1,7 @@
 import { default as classnames } from 'classnames';
 import { darken } from 'polished';
 
-import { deprecatedCss, ShelfIcon } from '../../common-elements';
+import { deprecatedCss, LockIcon, ShelfIcon } from '../../common-elements';
 import styled, { css, media, ResolvedThemeInterface } from '../../styled-components';
 
 export const OperationBadge = styled.span.attrs((props: { type: string }) => ({
@@ -130,6 +130,7 @@ export const MenuItemLabel = styled.label.attrs((props: MenuItemLabelType) => ({
     active: props.active,
   }),
 }))<MenuItemLabelType>`
+  position: relative;
   cursor: pointer;
   color: ${props =>
     props.active
@@ -202,4 +203,12 @@ export const RedocAttribution = styled.div`
   ${media.lessThan('small')`
     width: 100%;
   `};
+`;
+
+export const MenuItemLockIcon = styled(LockIcon)`
+  position: absolute;
+  left: 6px;
+  top: 16px;
+  font-size: 12px;
+  color: gray;
 `;

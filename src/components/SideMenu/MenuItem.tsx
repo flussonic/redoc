@@ -5,7 +5,13 @@ import { ShelfIcon } from '../../common-elements/shelfs';
 import { OperationModel } from '../../services';
 import { shortenHTTPVerb } from '../../utils/openapi';
 import { MenuItems } from './MenuItems';
-import { MenuItemLabel, MenuItemLi, MenuItemTitle, OperationBadge } from './styled.elements';
+import {
+  MenuItemLabel,
+  MenuItemLi,
+  MenuItemLockIcon,
+  MenuItemTitle,
+  OperationBadge,
+} from './styled.elements';
 import { l } from '../../services/Labels';
 import { scrollIntoViewIfNeeded } from '../../utils';
 import { OptionsContext } from '../OptionsProvider';
@@ -89,6 +95,7 @@ export const OperationMenuItemContent = observer((props: OperationMenuItemConten
 
   return (
     <MenuItemLabel depth={item.depth} active={item.active} deprecated={item.deprecated} ref={ref}>
+      {item.isPrivate && <MenuItemLockIcon />}
       {item.isWebhook ? (
         <OperationBadge type="hook">
           {showWebhookVerb ? item.httpVerb : l('webhook')}

@@ -26,6 +26,12 @@ COPY config config
 COPY src src
 COPY cli cli
 COPY ci ci
-RUN npm run bundle
-
 COPY Makefile Makefile
+
+# build
+RUN npm run bundle:lib
+RUN npm run bundle:standalone
+
+# cli
+RUN npm --prefix ./cli ci ./cli
+RUN npm run compile:cli

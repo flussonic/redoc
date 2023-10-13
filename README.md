@@ -1,3 +1,17 @@
+
+# This is [Redoc](https://github.com/Redocly/redoc) fork with the following features:
+
+- direct links to query parameters, response properties and model properties. e.g. `/stream_get/response%7Cbackup%7Ctimeout` with
+  - unlimited nesting enabled
+  - discriminator enabled
+- extra labels:
+  - 'Private' for properties with `x-private: true`
+  - 'Delete at' for properties with `x-delete-at: 23.09`
+- the Private icon for paths with `x-private: true`
+- the check for Nested recursion disabled to fix Out of Memory error https://github.com/Redocly/redoc/issues/2184
+
+<hr>
+
 <div align="center">
   <img alt="Redoc logo" src="https://raw.githubusercontent.com/Redocly/redoc/main//docs/images/redoc.png" width="400px" />
 

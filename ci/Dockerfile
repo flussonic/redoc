@@ -13,7 +13,6 @@ RUN apt update \
 # компонент
 WORKDIR redoc
 COPY package.json .
-COPY package-lock.json .
 RUN npm install
 
 COPY tsconfig.json .
@@ -25,7 +24,6 @@ COPY config config
 
 COPY src src
 COPY cli cli
-COPY ci ci
 COPY Makefile Makefile
 
 # build

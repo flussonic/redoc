@@ -13,7 +13,7 @@ RUN apt update \
 # компонент
 WORKDIR redoc
 COPY package.json .
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY tsconfig.json .
 COPY tsconfig.lib.json .

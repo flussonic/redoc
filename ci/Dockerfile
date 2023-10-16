@@ -10,10 +10,16 @@ RUN apt update \
     && apt -y install \
         nodejs build-essential yarn git
 
+RUN node --version
+RUN npm --version
+
 # компонент
 WORKDIR redoc
 COPY package.json .
-RUN npm install --legacy-peer-deps
+COPY .yarnrc.yml .
+COPY yarn.lock .
+RUN yarn set version 3.1.1
+RUN yarn install
 
 COPY tsconfig.json .
 COPY tsconfig.lib.json .
@@ -26,10 +32,8 @@ COPY src src
 COPY cli cli
 COPY Makefile Makefile
 
-# build
-RUN npm run bundle:lib
-RUN npm run bundle:standalone
-
 # cli
-RUN npm --prefix ./cli ci ./cli
-RUN npm run compile:cli
+RUN npm --prefix ./cli i ./cli
+
+# build
+RUN yarn run bundle

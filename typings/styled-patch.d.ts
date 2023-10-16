@@ -2,13 +2,6 @@ import * as styledComponents from 'styled-components';
 
 // FIXME
 declare module 'styled-components' {
-  interface ThemedStyledComponentsModule<T> {
-    keyframes(
-      strings: TemplateStringsArray | string[],
-      ...interpolations: SimpleInterpolation[]
-    ): Keyframes;
-  }
-
   export interface BaseThemedCssFunction<T extends object> {
     <P extends object>(
       first:

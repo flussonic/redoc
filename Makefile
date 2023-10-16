@@ -31,8 +31,14 @@ ci_publish_npm_gitlab:
 ci_publish_npm_gitlab_cli:
 	docker run --rm -e GITLAB_NPM_AUTH_TOKEN -e VERSION=${VERSION} -e CI_PROJECT_ID ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest make npm_publish_gitlab_cli
 
+ci_publish_npm:
+	docker run --rm -e NPM_AUTH_TOKEN -e VERSION=${VERSION} ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest make npm_publish_public
+
 npm_publish_public:
 	echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc
+	sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' package.json
+	sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' cli/package.json
+	sed -i 's/  "@flussonic\/redoc".*/  "@flussonic\/redoc": "'${VERSION}'",/g' cli/package.json
 	npm publish --access public
 
 npm_publish_gitlab:

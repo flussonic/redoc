@@ -14,5 +14,6 @@
 !package-lock.json
 !yarn.lock
 !.yarnrc.yml
+!.npmignore
 
 !Makefile

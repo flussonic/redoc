@@ -22,6 +22,7 @@ RUN yarn set version 3.1.1
 RUN yarn install
 
 COPY tsconfig.json .
+COPY .npmignore .
 COPY tsconfig.lib.json .
 COPY webpack.config.ts .
 COPY custom.d.ts .

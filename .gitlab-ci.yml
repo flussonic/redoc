@@ -17,7 +17,7 @@ npm-upload:
 npm-upload-public:
   stage: Upload
   script:
-    - make BRANCH=$CI_COMMIT_REF_SLUG GITLAB_NPM_AUTH_TOKEN=$GITLAB_NPM_AUTH_TOKEN ci_publish_npm
+    - make BRANCH=$CI_COMMIT_REF_SLUG GITLAB_NPM_AUTH_TOKEN=$GITLAB_NPM_AUTH_TOKEN TAG=$CI_COMMIT_TAG VERSION=$CI_COMMIT_SHORT_SHA ci_publish_npm
 
 npm-upload-cli:
   stage: Upload

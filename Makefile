@@ -6,9 +6,12 @@ ifeq (,${CI_COMMIT_SHORT_SHA})
   CI_COMMIT_SHORT_SHA ?= $(shell git rev-parse --short HEAD)
 endif
 
-VERSION ?= $(shell git describe --abbrev=7 --long | sed 's/^v//g')
+ifeq (,$(VERSION))
+  export VERSION=$(shell git describe --abbrev=7 --long | sed 's/^v//g')
+endif
+
 ifneq (,$(TAG))
-  VERSION=$(shell echo ${TAG} | sed 's/^v//')
+  TAG=$(shell echo ${TAG} | sed 's/^v//')
 endif
 
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
@@ -32,13 +35,13 @@ ci_publish_npm_gitlab_cli:
 	docker run --rm -e GITLAB_NPM_AUTH_TOKEN -e VERSION=${VERSION} -e CI_PROJECT_ID ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest make npm_publish_gitlab_cli
 
 ci_publish_npm:
-	docker run --rm -e NPM_AUTH_TOKEN -e VERSION=${VERSION} ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest make npm_publish_public
+	docker run --rm -e GITLAB_NPM_AUTH_TOKEN -e TAG=${TAG} ${CI_REGISTRY}/redoc/src-${HTTP_BRANCH}:latest make npm_publish_public
 
 npm_publish_public:
-	echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > .npmrc
-	sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' package.json
-	sed -i 's/  "version".*/  "version": "'${VERSION}'",/g' cli/package.json
-	sed -i 's/  "@flussonic\/redoc".*/  "@flussonic\/redoc": "'${VERSION}'",/g' cli/package.json
+	echo "//registry.npmjs.org/:_authToken=${GITLAB_NPM_AUTH_TOKEN}" > .npmrc
+	sed -i 's/  "version".*/  "version": "'${TAG}'",/g' package.json
+	sed -i 's/  "version".*/  "version": "'${TAG}'",/g' cli/package.json
+	sed -i 's/  "@flussonic\/redoc".*/  "@flussonic\/redoc": "'${TAG}'",/g' cli/package.json
 	npm publish --access public
 
 npm_publish_gitlab:

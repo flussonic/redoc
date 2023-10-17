@@ -1,6 +1,6 @@
 {
   "name": "@flussonic/redoc-cli",
-  "version": "0.13.30",
+  "version": "1.0.11",
   "description": "ReDoc's Command Line Interface",
   "main": "index.js",
   "bin": "index.js",

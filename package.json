@@ -4,8 +4,9 @@
   "description": "ReDoc",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Redocly/redoc"
+    "url": "git://github.com/flussonic/redoc"
   },
+  "homepage": "https://github.com/flussonic/redoc#readme",
   "browserslist": [
     "defaults"
   ],

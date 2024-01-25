@@ -31,6 +31,8 @@ export interface LabelsConfig {
   deprecated: string;
   private: string;
   deleteAt: string;
+  openmetricsLabel: string;
+  openmetricsMetric: string;
   example: string;
   examples: string;
   recursive: string;

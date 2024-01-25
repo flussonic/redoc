@@ -8,6 +8,8 @@ const labels: LabelsConfig = {
   deprecated: 'Deprecated',
   private: 'Private',
   deleteAt: 'Delete at',
+  openmetricsLabel: 'Openmetrics label',
+  openmetricsMetric: 'Openmetrics metric',
   example: 'Example',
   examples: 'Examples',
   recursive: 'Recursive',

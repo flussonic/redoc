@@ -38,6 +38,8 @@ export const FieldDetailsComponent = observer((props: FieldProps) => {
     const: _const,
     deleteAt,
     isPrivate,
+    openmetricsLabel,
+    openmetricsMetric,
   } = field;
   const isArrayType = schema.type === 'array';
 
@@ -96,7 +98,7 @@ export const FieldDetailsComponent = observer((props: FieldProps) => {
         {schema.isCircular && <RecursiveLabel> {l('recursive')} </RecursiveLabel>}
         {isArrayType && schema.items && <ArrayItemDetails schema={schema.items} />}
       </div>
-      {(deprecated || isPrivate || deleteAt) && (
+      {(deprecated || isPrivate || deleteAt || openmetricsLabel || openmetricsMetric) && (
         <div>
           {deprecated && <Badge type="warning"> {l('deprecated')} </Badge>}
           {deleteAt && (
@@ -106,6 +108,18 @@ export const FieldDetailsComponent = observer((props: FieldProps) => {
             </Badge>
           )}
           {isPrivate && <Badge type="error"> {l('private')} </Badge>}
+          {openmetricsLabel && (
+            <Badge type="primary">
+              {' '}
+              {l('openmetricsLabel')}: {openmetricsLabel}{' '}
+            </Badge>
+          )}
+          {openmetricsMetric && (
+            <Badge type="primary" hue="light">
+              {' '}
+              {l('openmetricsMetric')}: {openmetricsMetric}{' '}
+            </Badge>
+          )}
         </div>
       )}
       <FieldDetail raw={rawDefault} label={l('default') + ':'} value={schema.default} />
